@@ -71,7 +71,7 @@ export function FincaMap() {
     if (!map) return;
     boundaryLayerRef.current?.remove();
     const layer = L.geoJSON(geometria as unknown as GeoJSON.GeoJsonObject, {
-      style: { color: "#facc15", weight: 3, fillOpacity: 0.08 },
+      style: { color: "#2563eb", weight: 2, opacity: 0.7, fill: false },
     });
     layer.addTo(map);
     boundaryLayerRef.current = layer;
@@ -229,8 +229,16 @@ export function FincaMap() {
       if (layer) {
         // Ya hay una linde: se editan sus vértices arrastrando, sin pasos
         // intermedios de "dibujar" — este botón guardará al volver a tocarlo.
+        // removeVertexOn "click" para poder borrar un vértice tocándolo
+        // directamente (el valor por defecto es "contextmenu", que no
+        // funciona bien con el dedo en móvil).
         setBoundaryState("editando");
-        layer.eachLayer?.((sub) => (sub as L.Polygon).pm?.enable({ allowSelfIntersection: false }));
+        layer.eachLayer?.((sub) =>
+          (sub as L.Polygon).pm?.enable({
+            allowSelfIntersection: false,
+            removeVertexOn: "click",
+          })
+        );
       } else {
         // No hay ninguna todavía: se dibuja desde cero. El polígono no
         // existe hasta que se cierra (tocando el primer punto otra vez),
@@ -333,6 +341,12 @@ export function FincaMap() {
         <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-black/70 px-3 py-2 text-center text-xs text-white">
           Toca cada esquina de la linde. Para terminar, toca dos veces seguidas
           o vuelve a tocar el primer punto.
+        </div>
+      )}
+
+      {boundaryState === "editando" && (
+        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-black/70 px-3 py-2 text-center text-xs text-white">
+          Arrastra un punto para moverlo, o tócalo para borrarlo.
         </div>
       )}
 
