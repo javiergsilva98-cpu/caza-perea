@@ -2,11 +2,15 @@
 
 ## Aplicar el esquema
 
-Opción rápida (sin instalar nada): abre el **SQL Editor** del proyecto en
-[supabase.com/dashboard](https://supabase.com/dashboard) y pega el contenido
-de `migrations/20260728000000_init_schema.sql`. Ejecútalo una vez.
+Los archivos de `migrations/` están numerados (`001`, `002`, `003`...) y hay
+que ejecutarlos **en ese orden**, una sola vez cada uno. Opción rápida (sin
+instalar nada): abre el **SQL Editor** del proyecto en
+[supabase.com/dashboard](https://supabase.com/dashboard), pega el contenido
+del primero que no hayas ejecutado todavía, dale a Run, y repite con el
+siguiente.
 
-Opción con la CLI de Supabase (recomendada a partir de la 2ª migración):
+Opción con la CLI de Supabase (recomendada si en algún momento se quiere
+automatizar):
 
 ```bash
 npm install -g supabase
@@ -19,9 +23,9 @@ supabase db push
 
 No hay registro público: los tres usuarios se crean a mano desde
 **Authentication → Users → Add user** en el dashboard de Supabase (con email
-y contraseña). Al crearse el usuario en `auth.users`, un trigger
-(`on_auth_user_created`) crea automáticamente su fila en `public.usuarios`
-con rol `cazador`.
+y contraseña, marcando "Auto Confirm User"). Al crearse el usuario en
+`auth.users`, un trigger (`on_auth_user_created`) crea automáticamente su
+fila en `public.usuarios` con rol `cazador`.
 
 Para convertir el usuario propio en `admin`, ejecuta una vez en el SQL Editor
 (sustituyendo el email):
@@ -39,10 +43,15 @@ where id = (select id from auth.users where email = 'tu-email@example.com');
 - `finca_limite`: historial de versiones de la linde de la finca (GeoJSON).
   Cada edición inserta una fila nueva con `version` incremental; la vista
   `finca_limite_actual` expone siempre la última.
+- `capturas_avistamientos`: registro de capturas y avistamientos (especie,
+  cantidad, fecha, notas).
+- `actividades`: mantenimiento de puntos de interés (rellenado, revisión,
+  reparación), con fecha estimada de la próxima para recordatorios.
 
-RLS está activada en las tres tablas: cualquier usuario autenticado puede
-leer todo, pero solo puede editar/borrar lo suyo (o cualquier admin). Ver
-comentarios en la propia migración para el detalle de cada policy.
+RLS está activada en todas: cualquier usuario autenticado puede leer todo,
+pero solo puede editar/borrar lo suyo (o cualquier admin). Ver comentarios
+en cada migración para el detalle de las policies.
 
 Tablas previstas para sprints futuros (no creadas todavía, pero tenidas en
-cuenta en el diseño): `capturas_avistamientos`, `gastos`, `actividades`.
+cuenta en el diseño): `gastos` (item, importe, pagado_por, fecha — sin
+cálculos de reparto por ahora, solo histórico).
