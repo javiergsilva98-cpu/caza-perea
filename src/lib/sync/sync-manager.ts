@@ -35,6 +35,7 @@ const TABLE_BY_ENTITY = {
   finca_limite: "finca_limite",
   captura_avistamiento: "capturas_avistamientos",
   actividad: "actividades",
+  espera: "esperas",
 } as const;
 
 // finca_limite es de solo-inserción: cada edición crea una versión nueva
