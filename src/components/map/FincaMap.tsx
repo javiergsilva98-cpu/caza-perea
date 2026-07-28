@@ -52,7 +52,7 @@ export function FincaMap() {
   const modoRef = useRef<ModoColocar>(null);
 
   const [modoColocar, setModoColocar] = useState<ModoColocar>(null);
-  const [editingBoundary, setEditingBoundary] = useState(false);
+  const [boundaryState, setBoundaryState] = useState<"idle" | "dibujando" | "editando">("idle");
   const [puntoFormState, setPuntoFormState] = useState<PuntoFormState | null>(null);
   const [capturaCrearEn, setCapturaCrearEn] = useState<{ lat: number; lng: number } | null>(null);
   const [capturaDetalle, setCapturaDetalle] = useState<CapturaRow | null>(null);
@@ -137,6 +137,9 @@ export function FincaMap() {
       center: FINCA_CENTER,
       zoom: FINCA_DEFAULT_ZOOM,
       zoomControl: false,
+      // El doble toque para cerrar un polígono al dibujar la linde chocaba
+      // con el zoom por doble toque de Leaflet en móvil.
+      doubleClickZoom: false,
     });
     L.control.zoom({ position: "bottomright" }).addTo(map);
     L.tileLayer(ESRI_IMAGERY_URL, { maxZoom: 19, attribution: ESRI_ATTRIBUTION }).addTo(map);
@@ -160,7 +163,7 @@ export function FincaMap() {
       const drawn = e.layer as L.Polygon;
       const geojson = drawn.toGeoJSON();
       drawn.remove();
-      setEditingBoundary(false);
+      setBoundaryState("idle");
       renderBoundary(geojson as unknown as Json);
       void guardarFincaLimite(geojson as unknown as Json);
     });
@@ -217,22 +220,36 @@ export function FincaMap() {
     setModoColocar((actual) => (actual === modo ? null : modo));
   }
 
-  function toggleBoundaryEdit() {
+  function handleBoundaryButton() {
     const map = mapRef.current;
     if (!map) return;
 
-    if (!editingBoundary) {
-      setEditingBoundary(true);
+    if (boundaryState === "idle") {
       const layer = boundaryLayerRef.current;
       if (layer) {
+        // Ya hay una linde: se editan sus vértices arrastrando, sin pasos
+        // intermedios de "dibujar" — este botón guardará al volver a tocarlo.
+        setBoundaryState("editando");
         layer.eachLayer?.((sub) => (sub as L.Polygon).pm?.enable({ allowSelfIntersection: false }));
       } else {
+        // No hay ninguna todavía: se dibuja desde cero. El polígono no
+        // existe hasta que se cierra (tocando el primer punto otra vez),
+        // momento en el que pm:create lo guarda solo — este botón, mientras
+        // tanto, solo puede cancelar, nunca "guardar" algo que no existe aún.
+        setBoundaryState("dibujando");
         map.pm.enableDraw("Polygon", { finishOn: "dblclick", allowSelfIntersection: false });
       }
       return;
     }
 
-    setEditingBoundary(false);
+    if (boundaryState === "dibujando") {
+      map.pm.disableDraw("Polygon");
+      setBoundaryState("idle");
+      return;
+    }
+
+    // boundaryState === "editando": guarda los cambios sobre la linde ya existente.
+    setBoundaryState("idle");
     const layer = boundaryLayerRef.current;
     if (layer) {
       const geoJsonLayers: GeoJSON.Feature[] = [];
@@ -243,8 +260,6 @@ export function FincaMap() {
       const geometria =
         geoJsonLayers.length === 1 ? geoJsonLayers[0] : { type: "FeatureCollection", features: geoJsonLayers };
       void guardarFincaLimite(geometria as unknown as Json);
-    } else {
-      map.pm.disableDraw("Polygon");
     }
   }
 
@@ -309,17 +324,26 @@ export function FincaMap() {
         <SyncBadge />
       </div>
 
+      {boundaryState === "dibujando" && (
+        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-black/70 px-3 py-2 text-center text-xs text-white">
+          Toca cada esquina de la linde. Para terminar, toca dos veces seguidas
+          o vuelve a tocar el primer punto.
+        </div>
+      )}
+
       <div className="absolute bottom-24 right-3 z-20 flex flex-col gap-2">
         <button
           type="button"
-          onClick={toggleBoundaryEdit}
+          onClick={handleBoundaryButton}
           className={`rounded-full px-4 py-3 text-xs font-medium shadow ${
-            editingBoundary
+            boundaryState !== "idle"
               ? "bg-amber-600 text-white"
               : "border border-black/10 bg-white/95 text-foreground dark:border-white/15 dark:bg-black/90"
           }`}
         >
-          {editingBoundary ? "Guardar linde" : "Editar linde"}
+          {boundaryState === "idle" && "Editar linde"}
+          {boundaryState === "dibujando" && "Cancelar"}
+          {boundaryState === "editando" && "Guardar linde"}
         </button>
         <button
           type="button"
