@@ -20,6 +20,7 @@ export function PuntoForm({
   onSubmit,
   onDelete,
   onCancel,
+  onRegistrarActividad,
 }: {
   titulo: string;
   inicial: PuntoFormValues;
@@ -28,6 +29,7 @@ export function PuntoForm({
   onSubmit: (values: PuntoFormValues) => void | Promise<void>;
   onDelete?: () => void | Promise<void>;
   onCancel: () => void;
+  onRegistrarActividad?: () => void;
 }) {
   const [nombre, setNombre] = useState(inicial.nombre);
   const [tipo, setTipo] = useState<TipoPuntoInteres>(inicial.tipo);
@@ -100,6 +102,16 @@ export function PuntoForm({
               className="resize-none rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 disabled:opacity-60 dark:border-white/15 dark:bg-white/5"
             />
           </div>
+
+          {onRegistrarActividad && (
+            <button
+              type="button"
+              onClick={onRegistrarActividad}
+              className="rounded-lg border border-emerald-700/30 px-4 py-3 text-sm font-medium text-emerald-800 dark:text-emerald-400"
+            >
+              🧰 Registrar actividad aquí
+            </button>
+          )}
 
           <div className="flex gap-2">
             <button

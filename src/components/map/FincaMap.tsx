@@ -13,20 +13,28 @@ import {
   borrarPuntoInteres,
 } from "@/lib/data/puntos-interes";
 import { getFincaLimiteActual, guardarFincaLimite } from "@/lib/data/finca-limite";
+import { listCapturas, crearCaptura, borrarCaptura } from "@/lib/data/capturas";
+import { crearActividad } from "@/lib/data/actividades";
+import { listUsuariosNombres } from "@/lib/data/usuarios";
 import { startSyncTriggers } from "@/lib/sync/sync-manager";
 import { createClient } from "@/lib/supabase/client";
-import type { PuntoInteresRow } from "@/lib/offline/db";
+import type { CapturaRow, PuntoInteresRow } from "@/lib/offline/db";
 import type { Json } from "@/lib/supabase/database.types";
-import { iconoPunto } from "./icons";
+import { iconoCaptura, iconoPunto } from "./icons";
 import { PuntoForm, type PuntoFormValues } from "./PuntoForm";
 import { SyncBadge } from "./SyncBadge";
+import { CapturaForm, type CapturaFormValues } from "@/components/capturas/CapturaForm";
+import { CapturaDetail } from "@/components/capturas/CapturaDetail";
+import { ActividadForm, type ActividadFormValues } from "@/components/actividades/ActividadForm";
 
-interface FormState {
+interface PuntoFormState {
   modo: "crear" | "editar";
   lat: number;
   lng: number;
   punto?: PuntoInteresRow;
 }
+
+type ModoColocar = "punto" | "captura" | null;
 
 const ESRI_IMAGERY_URL =
   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
@@ -38,18 +46,25 @@ export function FincaMap() {
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<globalThis.Map<string, L.Marker>>(new globalThis.Map());
   const puntosRef = useRef<globalThis.Map<string, PuntoInteresRow>>(new globalThis.Map());
+  const capturaMarkersRef = useRef<globalThis.Map<string, L.Marker>>(new globalThis.Map());
+  const capturasRef = useRef<globalThis.Map<string, CapturaRow>>(new globalThis.Map());
   const boundaryLayerRef = useRef<L.GeoJSON | null>(null);
-  const addModeRef = useRef(false);
+  const modoRef = useRef<ModoColocar>(null);
 
-  const [addMode, setAddMode] = useState(false);
+  const [modoColocar, setModoColocar] = useState<ModoColocar>(null);
   const [editingBoundary, setEditingBoundary] = useState(false);
-  const [formState, setFormState] = useState<FormState | null>(null);
+  const [puntoFormState, setPuntoFormState] = useState<PuntoFormState | null>(null);
+  const [capturaCrearEn, setCapturaCrearEn] = useState<{ lat: number; lng: number } | null>(null);
+  const [capturaDetalle, setCapturaDetalle] = useState<CapturaRow | null>(null);
+  const [actividadPuntoId, setActividadPuntoId] = useState<string | null>(null);
+  const [puntosLista, setPuntosLista] = useState<PuntoInteresRow[]>([]);
+  const [nombres, setNombres] = useState<Record<string, string>>({});
   const [userId, setUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    addModeRef.current = addMode;
-  }, [addMode]);
+    modoRef.current = modoColocar;
+  }, [modoColocar]);
 
   function renderBoundary(geometria: Json) {
     const map = mapRef.current;
@@ -66,6 +81,7 @@ export function FincaMap() {
     const map = mapRef.current;
     if (!map) return;
     puntosRef.current.set(p.id, p);
+    setPuntosLista(Array.from(puntosRef.current.values()));
     const existing = markersRef.current.get(p.id);
     if (existing) {
       existing.setLatLng([p.lat, p.lng]);
@@ -76,7 +92,7 @@ export function FincaMap() {
     marker.on("click", () => {
       const actual = puntosRef.current.get(p.id);
       if (!actual) return;
-      setFormState({ modo: "editar", lat: actual.lat, lng: actual.lng, punto: actual });
+      setPuntoFormState({ modo: "editar", lat: actual.lat, lng: actual.lng, punto: actual });
     });
     marker.addTo(map);
     markersRef.current.set(p.id, marker);
@@ -86,6 +102,31 @@ export function FincaMap() {
     markersRef.current.get(id)?.remove();
     markersRef.current.delete(id);
     puntosRef.current.delete(id);
+    setPuntosLista(Array.from(puntosRef.current.values()));
+  }
+
+  function addOrUpdateCapturaMarker(c: CapturaRow) {
+    const map = mapRef.current;
+    if (!map || c.lat === null || c.lng === null) return;
+    capturasRef.current.set(c.id, c);
+    const existing = capturaMarkersRef.current.get(c.id);
+    if (existing) {
+      existing.setLatLng([c.lat, c.lng]);
+      return;
+    }
+    const marker = L.marker([c.lat, c.lng], { icon: iconoCaptura(c.tipo) });
+    marker.on("click", () => {
+      const actual = capturasRef.current.get(c.id);
+      if (actual) setCapturaDetalle(actual);
+    });
+    marker.addTo(map);
+    capturaMarkersRef.current.set(c.id, marker);
+  }
+
+  function removeCapturaMarker(id: string) {
+    capturaMarkersRef.current.get(id)?.remove();
+    capturaMarkersRef.current.delete(id);
+    capturasRef.current.delete(id);
   }
 
   // Inicializa el mapa una sola vez.
@@ -101,9 +142,14 @@ export function FincaMap() {
     L.tileLayer(ESRI_IMAGERY_URL, { maxZoom: 19, attribution: ESRI_ATTRIBUTION }).addTo(map);
 
     map.on("click", (e: L.LeafletMouseEvent) => {
-      if (!addModeRef.current) return;
-      setFormState({ modo: "crear", lat: e.latlng.lat, lng: e.latlng.lng });
-      setAddMode(false);
+      const modo = modoRef.current;
+      if (modo === "punto") {
+        setPuntoFormState({ modo: "crear", lat: e.latlng.lat, lng: e.latlng.lng });
+        setModoColocar(null);
+      } else if (modo === "captura") {
+        setCapturaCrearEn({ lat: e.latlng.lat, lng: e.latlng.lng });
+        setModoColocar(null);
+      }
     });
 
     map.on("pm:create", (e) => {
@@ -125,17 +171,21 @@ export function FincaMap() {
     };
   }, []);
 
-  // Carga inicial de datos (puntos + linde), con caché offline.
+  // Carga inicial de datos (puntos, linde, capturas), con caché offline.
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [puntos, limite] = await Promise.all([
+      const [puntos, limite, capturas, nombresMap] = await Promise.all([
         listPuntosInteres(),
         getFincaLimiteActual(),
+        listCapturas(),
+        listUsuariosNombres(),
       ]);
       if (cancelled) return;
       puntos.forEach(addOrUpdateMarker);
       if (limite) renderBoundary(limite.geometria);
+      capturas.forEach(addOrUpdateCapturaMarker);
+      setNombres(nombresMap);
     })();
     return () => {
       cancelled = true;
@@ -159,6 +209,10 @@ export function FincaMap() {
       setIsAdmin(data?.rol === "admin");
     })();
   }, []);
+
+  function toggleModoColocar(modo: "punto" | "captura") {
+    setModoColocar((actual) => (actual === modo ? null : modo));
+  }
 
   function toggleBoundaryEdit() {
     const map = mapRef.current;
@@ -191,34 +245,58 @@ export function FincaMap() {
     }
   }
 
-  async function handleFormSubmit(values: PuntoFormValues) {
-    if (!formState) return;
-    if (formState.modo === "crear") {
+  async function handlePuntoSubmit(values: PuntoFormValues) {
+    if (!puntoFormState) return;
+    if (puntoFormState.modo === "crear") {
       const row = await crearPuntoInteres({
         nombre: values.nombre,
         tipo: values.tipo,
         notas: values.notas,
-        lat: formState.lat,
-        lng: formState.lng,
+        lat: puntoFormState.lat,
+        lng: puntoFormState.lng,
       });
       addOrUpdateMarker(row);
-    } else if (formState.punto) {
-      await editarPuntoInteres(formState.punto.id, values);
-      addOrUpdateMarker({ ...formState.punto, ...values });
+    } else if (puntoFormState.punto) {
+      await editarPuntoInteres(puntoFormState.punto.id, values);
+      addOrUpdateMarker({ ...puntoFormState.punto, ...values });
     }
-    setFormState(null);
+    setPuntoFormState(null);
   }
 
-  async function handleDelete() {
-    if (!formState?.punto) return;
-    await borrarPuntoInteres(formState.punto.id);
-    removeMarker(formState.punto.id);
-    setFormState(null);
+  async function handlePuntoDelete() {
+    if (!puntoFormState?.punto) return;
+    await borrarPuntoInteres(puntoFormState.punto.id);
+    removeMarker(puntoFormState.punto.id);
+    setPuntoFormState(null);
+  }
+
+  async function handleCapturaSubmit(values: CapturaFormValues) {
+    if (!capturaCrearEn) return;
+    const row = await crearCaptura({ ...values, lat: capturaCrearEn.lat, lng: capturaCrearEn.lng });
+    addOrUpdateCapturaMarker(row);
+    setCapturaCrearEn(null);
+  }
+
+  async function handleCapturaDelete() {
+    if (!capturaDetalle) return;
+    await borrarCaptura(capturaDetalle.id);
+    removeCapturaMarker(capturaDetalle.id);
+    setCapturaDetalle(null);
+  }
+
+  async function handleActividadSubmit(values: ActividadFormValues) {
+    await crearActividad(values);
+    setActividadPuntoId(null);
   }
 
   const puedeEditarPunto =
-    formState?.modo === "crear" ||
-    (!!formState?.punto && (formState.punto.creado_por === userId || isAdmin));
+    puntoFormState?.modo === "crear" ||
+    (!!puntoFormState?.punto && (puntoFormState.punto.creado_por === userId || isAdmin));
+
+  const puntoEnEdicion =
+    puntoFormState?.modo === "editar" && puntoFormState.punto ? puntoFormState.punto : null;
+  const puedeRegistrarActividad =
+    !!puntoEnEdicion && (puntoEnEdicion.tipo === "comedero" || puntoEnEdicion.tipo === "bebedero");
 
   return (
     <div className="relative flex-1">
@@ -242,30 +320,72 @@ export function FincaMap() {
         </button>
         <button
           type="button"
-          onClick={() => setAddMode((v) => !v)}
+          onClick={() => toggleModoColocar("captura")}
           className={`rounded-full px-4 py-3 text-xs font-medium shadow ${
-            addMode
+            modoColocar === "captura"
               ? "bg-emerald-800 text-white"
               : "border border-black/10 bg-white/95 text-foreground dark:border-white/15 dark:bg-black/90"
           }`}
         >
-          {addMode ? "Toca el mapa…" : "+ Punto"}
+          {modoColocar === "captura" ? "Toca el mapa…" : "🐗 + Captura"}
+        </button>
+        <button
+          type="button"
+          onClick={() => toggleModoColocar("punto")}
+          className={`rounded-full px-4 py-3 text-xs font-medium shadow ${
+            modoColocar === "punto"
+              ? "bg-emerald-800 text-white"
+              : "border border-black/10 bg-white/95 text-foreground dark:border-white/15 dark:bg-black/90"
+          }`}
+        >
+          {modoColocar === "punto" ? "Toca el mapa…" : "+ Punto"}
         </button>
       </div>
 
-      {formState && (
+      {puntoFormState && (
         <PuntoForm
-          titulo={formState.modo === "crear" ? "Nuevo punto" : "Editar punto"}
+          titulo={puntoFormState.modo === "crear" ? "Nuevo punto" : "Editar punto"}
           inicial={{
-            nombre: formState.punto?.nombre ?? "",
-            tipo: formState.punto?.tipo ?? "otro",
-            notas: formState.punto?.notas ?? null,
+            nombre: puntoFormState.punto?.nombre ?? "",
+            tipo: puntoFormState.punto?.tipo ?? "otro",
+            notas: puntoFormState.punto?.notas ?? null,
           }}
           puedeEditar={puedeEditarPunto}
-          puedeBorrar={!!formState.punto && (formState.punto.creado_por === userId || isAdmin)}
-          onSubmit={handleFormSubmit}
-          onDelete={formState.modo === "editar" ? handleDelete : undefined}
-          onCancel={() => setFormState(null)}
+          puedeBorrar={!!puntoFormState.punto && (puntoFormState.punto.creado_por === userId || isAdmin)}
+          onSubmit={handlePuntoSubmit}
+          onDelete={puntoFormState.modo === "editar" ? handlePuntoDelete : undefined}
+          onCancel={() => setPuntoFormState(null)}
+          onRegistrarActividad={
+            puedeRegistrarActividad
+              ? () => {
+                  setActividadPuntoId(puntoEnEdicion!.id);
+                  setPuntoFormState(null);
+                }
+              : undefined
+          }
+        />
+      )}
+
+      {capturaCrearEn && (
+        <CapturaForm onSubmit={handleCapturaSubmit} onCancel={() => setCapturaCrearEn(null)} />
+      )}
+
+      {capturaDetalle && (
+        <CapturaDetail
+          captura={capturaDetalle}
+          registradoPorNombre={nombres[capturaDetalle.registrado_por] ?? "—"}
+          puedeBorrar={capturaDetalle.registrado_por === userId || isAdmin}
+          onDelete={handleCapturaDelete}
+          onClose={() => setCapturaDetalle(null)}
+        />
+      )}
+
+      {actividadPuntoId && (
+        <ActividadForm
+          puntos={puntosLista}
+          puntoPreseleccionado={actividadPuntoId}
+          onSubmit={handleActividadSubmit}
+          onCancel={() => setActividadPuntoId(null)}
         />
       )}
     </div>
