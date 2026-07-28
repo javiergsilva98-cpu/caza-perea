@@ -21,14 +21,18 @@ supabase db push
 
 ## Dar de alta usuarios
 
-No hay registro público: los tres usuarios se crean a mano desde
-**Authentication → Users → Add user** en el dashboard de Supabase (con email
-y contraseña, marcando "Auto Confirm User"). Al crearse el usuario en
-`auth.users`, un trigger (`on_auth_user_created`) crea automáticamente su
-fila en `public.usuarios` con rol `cazador`.
+No hay registro público. Para el primer usuario (tú, como admin), créalo a
+mano desde **Authentication → Users → Add user** en el dashboard de
+Supabase (con email y contraseña, marcando "Auto Confirm User"). Al crearse
+el usuario en `auth.users`, un trigger (`on_auth_user_created`) crea
+automáticamente su fila en `public.usuarios` con rol `cazador`.
 
-Para convertir el usuario propio en `admin`, ejecuta una vez en el SQL Editor
-(sustituyendo el email):
+Para el resto de cazadores, ya no hace falta el dashboard: como admin,
+entra en la app → Perfil → "+ Invitar cazador". Necesita la variable de
+entorno `SUPABASE_SERVICE_ROLE_KEY` configurada (ver `.env.example`).
+
+Para convertir tu propio usuario en `admin` la primera vez, ejecuta una vez
+en el SQL Editor (sustituyendo el email):
 
 ```sql
 update public.usuarios
