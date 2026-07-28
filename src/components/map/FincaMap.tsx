@@ -318,7 +318,12 @@ export function FincaMap() {
 
   return (
     <div className="relative flex-1">
-      <div ref={containerRef} className="absolute inset-0" />
+      {/* isolate: sin esto, los z-index internos de Leaflet (teselas,
+          marcadores, controles — hasta 1000) compiten directamente con los
+          botones flotantes de abajo en vez de quedar contenidos dentro del
+          propio mapa. Solo se nota una vez las teselas han cargado y pintan
+          contenido opaco por encima. */}
+      <div ref={containerRef} className="absolute inset-0 isolate" />
 
       <div className="pointer-events-none absolute inset-x-0 top-3 z-20 flex justify-center px-3">
         <SyncBadge />
