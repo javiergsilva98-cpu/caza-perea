@@ -140,6 +140,9 @@ export function FincaMap() {
     });
     L.control.zoom({ position: "bottomright" }).addTo(map);
     L.tileLayer(ESRI_IMAGERY_URL, { maxZoom: 19, attribution: ESRI_ATTRIBUTION }).addTo(map);
+    // Quita el "Leaflet | 🇺🇦" que añade Leaflet por defecto — dejamos solo
+    // el crédito de Esri, obligatorio por las condiciones de uso gratuito.
+    map.attributionControl.setPrefix(false);
 
     map.on("click", (e: L.LeafletMouseEvent) => {
       const modo = modoRef.current;
