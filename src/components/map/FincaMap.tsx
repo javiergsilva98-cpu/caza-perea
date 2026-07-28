@@ -26,6 +26,8 @@ import { SyncBadge } from "./SyncBadge";
 import { CapturaForm, type CapturaFormValues } from "@/components/capturas/CapturaForm";
 import { CapturaDetail } from "@/components/capturas/CapturaDetail";
 import { ActividadForm, type ActividadFormValues } from "@/components/actividades/ActividadForm";
+import { PegarUbicacionForm } from "./PegarUbicacionForm";
+import type { Coords } from "@/lib/geo/google-maps";
 
 interface PuntoFormState {
   modo: "crear" | "editar";
@@ -57,6 +59,7 @@ export function FincaMap() {
   const [capturaCrearEn, setCapturaCrearEn] = useState<{ lat: number; lng: number } | null>(null);
   const [capturaDetalle, setCapturaDetalle] = useState<CapturaRow | null>(null);
   const [actividadPuntoId, setActividadPuntoId] = useState<string | null>(null);
+  const [pegarUbicacionAbierto, setPegarUbicacionAbierto] = useState(false);
   const [puntosLista, setPuntosLista] = useState<PuntoInteresRow[]>([]);
   const [nombres, setNombres] = useState<Record<string, string>>({});
   const [userId, setUserId] = useState<string | null>(null);
@@ -296,6 +299,13 @@ export function FincaMap() {
     setPuntoFormState(null);
   }
 
+  function handleUbicacionPegadaResuelta(coords: Coords) {
+    setPegarUbicacionAbierto(false);
+    const map = mapRef.current;
+    if (map) map.setView([coords.lat, coords.lng], Math.max(map.getZoom(), 17));
+    setPuntoFormState({ modo: "crear", lat: coords.lat, lng: coords.lng });
+  }
+
   async function handleCapturaSubmit(values: CapturaFormValues) {
     if (!capturaCrearEn) return;
     const row = await crearCaptura({ ...values, lat: capturaCrearEn.lat, lng: capturaCrearEn.lng });
@@ -386,6 +396,13 @@ export function FincaMap() {
         >
           {modoColocar === "punto" ? "Toca el mapa…" : "+ Punto"}
         </button>
+        <button
+          type="button"
+          onClick={() => setPegarUbicacionAbierto(true)}
+          className="rounded-full border border-black/10 bg-white/95 px-4 py-3 text-xs font-medium text-foreground shadow dark:border-white/15 dark:bg-black/90"
+        >
+          📍 Desde enlace
+        </button>
       </div>
 
       {puntoFormState && (
@@ -418,6 +435,13 @@ export function FincaMap() {
 
       {capturaCrearEn && (
         <CapturaForm onSubmit={handleCapturaSubmit} onCancel={() => setCapturaCrearEn(null)} />
+      )}
+
+      {pegarUbicacionAbierto && (
+        <PegarUbicacionForm
+          onResolved={handleUbicacionPegadaResuelta}
+          onCancel={() => setPegarUbicacionAbierto(false)}
+        />
       )}
 
       {capturaDetalle && (

@@ -10,7 +10,11 @@ function isPublicPath(pathname: string) {
     pathname.startsWith("/icons") ||
     pathname === "/manifest.webmanifest" ||
     pathname === "/sw.js" ||
-    pathname === "/favicon.ico"
+    pathname === "/favicon.ico" ||
+    // Las rutas de API comprueban su propia sesión y devuelven JSON con
+    // 401 si no hay usuario — un redirect a /login no sirve de nada a un
+    // fetch() y solo confundiría al cliente con HTML en vez de JSON.
+    pathname.startsWith("/api/")
   );
 }
 
