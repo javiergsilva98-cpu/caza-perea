@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { TipoPuntoInteres } from "@/lib/supabase/database.types";
 import { TIPO_LABEL } from "./icons";
 
-const TIPOS: TipoPuntoInteres[] = ["comedero", "bebedero", "puesto", "otro"];
+const TIPOS: TipoPuntoInteres[] = ["comedero", "bebedero", "puesto", "casa", "otro"];
 
 export interface PuntoFormValues {
   nombre: string;
@@ -87,7 +87,7 @@ export function PuntoForm({
 
           <div className="flex flex-col gap-1">
             <span className="text-sm font-medium text-ink">Tipo</span>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               {TIPOS.map((t) => (
                 <button
                   key={t}
