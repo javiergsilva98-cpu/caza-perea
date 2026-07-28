@@ -92,7 +92,7 @@ export function FincaMap() {
     if (!map) return;
     boundaryLayerRef.current?.remove();
     const layer = L.geoJSON(geometria as unknown as GeoJSON.GeoJsonObject, {
-      style: { color: "#D4A03C", weight: 3, opacity: 0.7, fill: false },
+      style: { color: "#2563eb", weight: 3, opacity: 0.7, fill: false },
     });
     layer.addTo(map);
     boundaryLayerRef.current = layer;

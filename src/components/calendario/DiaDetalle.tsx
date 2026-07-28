@@ -25,6 +25,7 @@ export function DiaDetalle({
   yoAsisto,
   cambiandoAsistencia,
   onToggleAsistencia,
+  onAnadirActividad,
   capturas,
   actividades,
   esperas,
@@ -37,6 +38,7 @@ export function DiaDetalle({
   yoAsisto: boolean;
   cambiandoAsistencia: boolean;
   onToggleAsistencia: () => void;
+  onAnadirActividad: () => void;
   capturas: CapturaRow[];
   actividades: ActividadRow[];
   esperas: EsperaRow[];
@@ -55,16 +57,25 @@ export function DiaDetalle({
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-soft/30" />
         <h2 className="text-base font-semibold text-ink">{formatFechaLarga(fecha)}</h2>
 
-        <button
-          type="button"
-          onClick={onToggleAsistencia}
-          disabled={cambiandoAsistencia}
-          className={`mt-4 w-full rounded-lg px-4 py-3 text-sm font-medium disabled:opacity-60 ${
-            yoAsisto ? "border border-alert text-alert" : "bg-primary text-white"
-          }`}
-        >
-          {cambiandoAsistencia ? "Guardando…" : yoAsisto ? "No voy" : "Marcar que voy"}
-        </button>
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            onClick={onToggleAsistencia}
+            disabled={cambiandoAsistencia}
+            className={`flex-1 rounded-lg px-4 py-3 text-sm font-medium disabled:opacity-60 ${
+              yoAsisto ? "border border-alert text-alert" : "bg-primary text-white"
+            }`}
+          >
+            {cambiandoAsistencia ? "Guardando…" : yoAsisto ? "No voy" : "Marcar que voy"}
+          </button>
+          <button
+            type="button"
+            onClick={onAnadirActividad}
+            className="flex-1 rounded-lg border border-primary/30 px-4 py-3 text-sm font-medium text-primary"
+          >
+            🧰 Añadir actividad
+          </button>
+        </div>
 
         <div className="mt-4">
           <h3 className="text-xs font-medium uppercase tracking-wide text-ink-soft">Van</h3>
