@@ -409,6 +409,10 @@ export function FincaMap() {
                 }
               : undefined
           }
+          creadoPorNombre={
+            puntoFormState.punto ? nombres[puntoFormState.punto.creado_por] ?? "—" : undefined
+          }
+          fechaCreacion={puntoFormState.punto?.fecha_creacion}
         />
       )}
 
