@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { PuntoInteresRow } from "@/lib/offline/db";
 import type { TipoActividad } from "@/lib/supabase/database.types";
+import { TIPO_EMOJI } from "@/components/map/icons";
 
 const TIPOS: { value: TipoActividad; label: string }[] = [
   { value: "rellenado", label: "Rellenado" },
@@ -88,21 +89,24 @@ export function ActividadForm({
 
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label htmlFor="punto" className="text-sm font-medium text-ink">
-              Punto de interés
-            </label>
-            <select
-              id="punto"
-              value={puntoInteresId}
-              onChange={(e) => setPuntoInteresId(e.target.value)}
-              className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
-            >
+            <span className="text-sm font-medium text-ink">Punto de interés</span>
+            <div className="flex max-h-48 flex-col gap-1 overflow-y-auto rounded-lg border border-border p-1">
               {puntos.map((p) => (
-                <option key={p.id} value={p.id}>
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setPuntoInteresId(p.id)}
+                  className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm ${
+                    puntoInteresId === p.id
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-transparent text-ink"
+                  }`}
+                >
+                  <span className="text-lg leading-none">{TIPO_EMOJI[p.tipo]}</span>
                   {p.nombre}
-                </option>
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
           <div className="flex flex-col gap-1">
