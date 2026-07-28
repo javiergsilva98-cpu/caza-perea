@@ -10,6 +10,7 @@ export type RolUsuario = "admin" | "cazador";
 export type TipoPuntoInteres = "comedero" | "bebedero" | "puesto" | "otro";
 export type TipoCaptura = "captura" | "avistamiento";
 export type TipoActividad = "rellenado" | "revision" | "reparacion" | "otro";
+export type TipoDocumento = "seguro" | "licencia";
 
 export interface Database {
   public: {
@@ -257,6 +258,71 @@ export interface Database {
           {
             foreignKeyName: "esperas_asignado_por_fkey";
             columns: ["asignado_por"];
+            referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      calendario_asistencias: {
+        Row: {
+          id: string;
+          cazador_id: string;
+          fecha: string;
+          notas: string | null;
+          fecha_registro: string;
+        };
+        Insert: {
+          id?: string;
+          cazador_id?: string;
+          fecha: string;
+          notas?: string | null;
+          fecha_registro?: string;
+        };
+        Update: {
+          id?: string;
+          cazador_id?: string;
+          fecha?: string;
+          notas?: string | null;
+          fecha_registro?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "calendario_asistencias_cazador_id_fkey";
+            columns: ["cazador_id"];
+            referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      documentos_usuario: {
+        Row: {
+          id: string;
+          usuario_id: string;
+          tipo: TipoDocumento;
+          storage_path: string;
+          nombre_archivo: string;
+          fecha_subida: string;
+        };
+        Insert: {
+          id?: string;
+          usuario_id?: string;
+          tipo: TipoDocumento;
+          storage_path: string;
+          nombre_archivo: string;
+          fecha_subida?: string;
+        };
+        Update: {
+          id?: string;
+          usuario_id?: string;
+          tipo?: TipoDocumento;
+          storage_path?: string;
+          nombre_archivo?: string;
+          fecha_subida?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "documentos_usuario_usuario_id_fkey";
+            columns: ["usuario_id"];
             referencedRelation: "usuarios";
             referencedColumns: ["id"];
           },
