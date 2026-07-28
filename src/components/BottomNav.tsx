@@ -26,10 +26,12 @@ export function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-xs ${
+            className={`flex flex-1 items-center justify-center py-3 ${
               active ? "text-primary" : "text-ink-soft"
             }`}
             aria-current={active ? "page" : undefined}
+            aria-label={item.label}
+            title={item.label}
           >
             <span
               className={
@@ -37,13 +39,12 @@ export function BottomNav() {
                   ? `-mt-4 flex h-12 w-12 items-center justify-center rounded-full text-2xl leading-none shadow ${
                       active ? "bg-primary text-white" : "bg-primary/90 text-white"
                     }`
-                  : "text-lg leading-none"
+                  : "text-xl leading-none"
               }
               aria-hidden="true"
             >
               {item.icon}
             </span>
-            {item.label}
           </Link>
         );
       })}
