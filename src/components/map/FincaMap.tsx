@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet-rotate";
 import "@geoman-io/leaflet-geoman-free";
 import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
 import { FINCA_CENTER, FINCA_DEFAULT_ZOOM } from "@/lib/constants";
@@ -66,6 +67,25 @@ export function FincaMap() {
   useEffect(() => {
     modoRef.current = modoColocar;
   }, [modoColocar]);
+
+  // Bloquea la rotación mientras se edita (linde, punto o captura): fuerza
+  // el norte y esconde/desactiva la brújula, para que un toque durante la
+  // edición no pueda malinterpretarse por culpa del giro.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const editando = boundaryState !== "idle" || modoColocar !== null;
+    if (editando) {
+      map.setBearing(0);
+      map.touchRotate.disable();
+      map.shiftKeyRotate.disable();
+    } else {
+      map.touchRotate.enable();
+      map.shiftKeyRotate.enable();
+    }
+    const control = map.rotateControl?.getContainer();
+    if (control) control.style.display = editando ? "none" : "";
+  }, [boundaryState, modoColocar]);
 
   function renderBoundary(geometria: Json) {
     const map = mapRef.current;
@@ -141,6 +161,14 @@ export function FincaMap() {
       // El doble toque para cerrar un polígono al dibujar la linde chocaba
       // con el zoom por doble toque de Leaflet en móvil.
       doubleClickZoom: false,
+      // Rotación libre (brújula arrastrable + dos dedos), predeterminada al
+      // norte. Se bloquea mientras se edita la linde o se coloca un punto —
+      // ver el efecto más abajo — para no arriesgar que un toque se
+      // interprete en el sitio equivocado por culpa del giro.
+      rotate: true,
+      bearing: 0,
+      touchRotate: true,
+      rotateControl: { position: "topright", closeOnZeroBearing: false },
     });
     L.tileLayer(ESRI_IMAGERY_URL, { maxZoom: 19, attribution: ESRI_ATTRIBUTION }).addTo(map);
     // Quita el "Leaflet | 🇺🇦" que añade Leaflet por defecto — dejamos solo
