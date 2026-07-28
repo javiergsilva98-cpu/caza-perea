@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "../actions";
 import { InvitarUsuarioPanel } from "@/components/perfil/InvitarUsuarioPanel";
+import { DocumentosPanel } from "@/components/perfil/DocumentosPanel";
 
 export default async function PerfilPage() {
   const supabase = await createClient();
@@ -37,6 +38,8 @@ export default async function PerfilPage() {
           <dd className="text-ink capitalize">{perfil?.rol ?? "—"}</dd>
         </div>
       </dl>
+
+      <DocumentosPanel />
 
       {perfil?.rol === "admin" && <InvitarUsuarioPanel />}
 

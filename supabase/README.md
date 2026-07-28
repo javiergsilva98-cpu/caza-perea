@@ -51,10 +51,18 @@ where id = (select id from auth.users where email = 'tu-email@example.com');
   cantidad, fecha, notas).
 - `actividades`: mantenimiento de puntos de interés (rellenado, revisión,
   reparación), con fecha estimada de la próxima para recordatorios.
+- `esperas`: asignación de cazadores a puestos en fechas concretas.
+- `calendario_asistencias`: días en que cada cazador marca que va al coto.
+- `documentos_usuario`: metadatos (tipo, ruta, nombre de archivo) de los
+  documentos personales (seguro, licencia) subidos al bucket de Storage
+  `documentos`. A diferencia del resto, es **estrictamente privado**: cada
+  cazador solo ve y gestiona los suyos, ni siquiera un admin puede ver los
+  de otro (mismas policies en `storage.objects`, por carpeta `{usuario_id}/`).
 
-RLS está activada en todas: cualquier usuario autenticado puede leer todo,
-pero solo puede editar/borrar lo suyo (o cualquier admin). Ver comentarios
-en cada migración para el detalle de las policies.
+RLS está activada en todas: cualquier usuario autenticado puede leer todo
+(salvo `documentos_usuario`, que es privado por cazador), pero solo puede
+editar/borrar lo suyo (o cualquier admin, salvo en documentos). Ver
+comentarios en cada migración para el detalle de las policies.
 
 Tablas previstas para sprints futuros (no creadas todavía, pero tenidas en
 cuenta en el diseño): `gastos` (item, importe, pagado_por, fecha — sin
