@@ -7,7 +7,9 @@ import { startSyncTriggers } from "@/lib/sync/sync-manager";
 import { createClient } from "@/lib/supabase/client";
 import type { CapturaRow } from "@/lib/offline/db";
 import { CapturaForm, type CapturaFormValues } from "@/components/capturas/CapturaForm";
+import { PegarUbicacionForm } from "@/components/map/PegarUbicacionForm";
 import { SyncBadge } from "@/components/map/SyncBadge";
+import type { Coords } from "@/lib/geo/google-maps";
 
 function formatFecha(iso: string) {
   return new Date(iso + "T00:00:00").toLocaleDateString("es-ES", {
@@ -21,6 +23,8 @@ export default function CapturasPage() {
   const [nombres, setNombres] = useState<Record<string, string>>({});
   const [userId, setUserId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [pegarUbicacionAbierto, setPegarUbicacionAbierto] = useState(false);
+  const [ubicacionPendiente, setUbicacionPendiente] = useState<Coords | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,14 +47,25 @@ export default function CapturasPage() {
   }, []);
 
   async function handleSubmit(values: CapturaFormValues) {
-    const row = await crearCaptura({ ...values, lat: null, lng: null });
+    const row = await crearCaptura({
+      ...values,
+      lat: ubicacionPendiente?.lat ?? null,
+      lng: ubicacionPendiente?.lng ?? null,
+    });
     setCapturas((prev) => [row, ...prev]);
     setShowForm(false);
+    setUbicacionPendiente(null);
   }
 
   async function handleDelete(id: string) {
     await borrarCaptura(id);
     setCapturas((prev) => prev.filter((c) => c.id !== id));
+  }
+
+  function handleUbicacionResuelta(coords: Coords) {
+    setUbicacionPendiente(coords);
+    setPegarUbicacionAbierto(false);
+    setShowForm(true);
   }
 
   return (
@@ -103,10 +118,20 @@ export default function CapturasPage() {
         </ul>
       </div>
 
-      <div className="absolute bottom-4 right-4 z-20">
+      <div className="absolute bottom-4 right-4 z-20 flex flex-col items-end gap-2">
         <button
           type="button"
-          onClick={() => setShowForm(true)}
+          onClick={() => setPegarUbicacionAbierto(true)}
+          className="rounded-full border border-black/10 bg-white/95 px-4 py-2.5 text-xs font-medium text-foreground shadow dark:border-white/15 dark:bg-black/90"
+        >
+          📍 Desde enlace
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setUbicacionPendiente(null);
+            setShowForm(true);
+          }}
           className="rounded-full bg-emerald-800 px-5 py-3 text-sm font-medium text-white shadow"
         >
           + Registrar
@@ -114,7 +139,20 @@ export default function CapturasPage() {
       </div>
 
       {showForm && (
-        <CapturaForm onSubmit={handleSubmit} onCancel={() => setShowForm(false)} />
+        <CapturaForm
+          onSubmit={handleSubmit}
+          onCancel={() => {
+            setShowForm(false);
+            setUbicacionPendiente(null);
+          }}
+        />
+      )}
+
+      {pegarUbicacionAbierto && (
+        <PegarUbicacionForm
+          onResolved={handleUbicacionResuelta}
+          onCancel={() => setPegarUbicacionAbierto(false)}
+        />
       )}
     </div>
   );

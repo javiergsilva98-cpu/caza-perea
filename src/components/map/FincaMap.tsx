@@ -26,8 +26,6 @@ import { SyncBadge } from "./SyncBadge";
 import { CapturaForm, type CapturaFormValues } from "@/components/capturas/CapturaForm";
 import { CapturaDetail } from "@/components/capturas/CapturaDetail";
 import { ActividadForm, type ActividadFormValues } from "@/components/actividades/ActividadForm";
-import { PegarUbicacionForm } from "./PegarUbicacionForm";
-import type { Coords } from "@/lib/geo/google-maps";
 
 interface PuntoFormState {
   modo: "crear" | "editar";
@@ -59,7 +57,7 @@ export function FincaMap() {
   const [capturaCrearEn, setCapturaCrearEn] = useState<{ lat: number; lng: number } | null>(null);
   const [capturaDetalle, setCapturaDetalle] = useState<CapturaRow | null>(null);
   const [actividadPuntoId, setActividadPuntoId] = useState<string | null>(null);
-  const [pegarUbicacionAbierto, setPegarUbicacionAbierto] = useState(false);
+  const [menuAbierto, setMenuAbierto] = useState(false);
   const [puntosLista, setPuntosLista] = useState<PuntoInteresRow[]>([]);
   const [nombres, setNombres] = useState<Record<string, string>>({});
   const [userId, setUserId] = useState<string | null>(null);
@@ -219,15 +217,34 @@ export function FincaMap() {
     })();
   }, []);
 
+  // Cancela una edición de linde en curso, sin guardar nada. Se usa como
+  // salvaguarda para que no puedan quedar activos a la vez el dibujo de la
+  // linde y el modo de colocar punto/captura (ambos escuchan el toque en
+  // el mapa y entrarían en conflicto).
+  function resetLindeAIdle() {
+    const map = mapRef.current;
+    if (!map) return;
+    if (boundaryState === "dibujando") {
+      map.pm.disableDraw("Polygon");
+    } else if (boundaryState === "editando") {
+      boundaryLayerRef.current?.eachLayer?.((sub) => (sub as L.Polygon).pm?.disable());
+    }
+    setBoundaryState("idle");
+  }
+
   function toggleModoColocar(modo: "punto" | "captura") {
+    if (boundaryState !== "idle") resetLindeAIdle();
     setModoColocar((actual) => (actual === modo ? null : modo));
+    setMenuAbierto(false);
   }
 
   function handleBoundaryButton() {
     const map = mapRef.current;
     if (!map) return;
+    setMenuAbierto(false);
 
     if (boundaryState === "idle") {
+      setModoColocar(null);
       const layer = boundaryLayerRef.current;
       if (layer) {
         // Ya hay una linde: se editan sus vértices arrastrando, sin pasos
@@ -299,13 +316,6 @@ export function FincaMap() {
     setPuntoFormState(null);
   }
 
-  function handleUbicacionPegadaResuelta(coords: Coords) {
-    setPegarUbicacionAbierto(false);
-    const map = mapRef.current;
-    if (map) map.setView([coords.lat, coords.lng], Math.max(map.getZoom(), 17));
-    setPuntoFormState({ modo: "crear", lat: coords.lat, lng: coords.lng });
-  }
-
   async function handleCapturaSubmit(values: CapturaFormValues) {
     if (!capturaCrearEn) return;
     const row = await crearCaptura({ ...values, lat: capturaCrearEn.lat, lng: capturaCrearEn.lng });
@@ -360,48 +370,65 @@ export function FincaMap() {
         </div>
       )}
 
-      <div className="absolute bottom-24 right-3 z-20 flex flex-col gap-2">
+      {modoColocar === "punto" && (
+        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-black/70 px-3 py-2 text-center text-xs text-white">
+          Toca el mapa donde quieras añadir el punto.
+        </div>
+      )}
+
+      {modoColocar === "captura" && (
+        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-black/70 px-3 py-2 text-center text-xs text-white">
+          Toca el mapa donde ha pasado.
+        </div>
+      )}
+
+      <div className="absolute bottom-24 right-3 z-20 flex flex-col items-end gap-2">
+        {(menuAbierto || boundaryState !== "idle" || modoColocar !== null) && (
+          <>
+            <button
+              type="button"
+              onClick={handleBoundaryButton}
+              className={`rounded-full px-4 py-3 text-xs font-medium shadow ${
+                boundaryState !== "idle"
+                  ? "bg-amber-600 text-white"
+                  : "border border-black/10 bg-white/95 text-foreground dark:border-white/15 dark:bg-black/90"
+              }`}
+            >
+              {boundaryState === "idle" && "Editar linde"}
+              {boundaryState === "dibujando" && "Cancelar"}
+              {boundaryState === "editando" && "Guardar linde"}
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleModoColocar("captura")}
+              className={`rounded-full px-4 py-3 text-xs font-medium shadow ${
+                modoColocar === "captura"
+                  ? "bg-emerald-800 text-white"
+                  : "border border-black/10 bg-white/95 text-foreground dark:border-white/15 dark:bg-black/90"
+              }`}
+            >
+              {modoColocar === "captura" ? "Toca el mapa…" : "🐗 + Captura"}
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleModoColocar("punto")}
+              className={`rounded-full px-4 py-3 text-xs font-medium shadow ${
+                modoColocar === "punto"
+                  ? "bg-emerald-800 text-white"
+                  : "border border-black/10 bg-white/95 text-foreground dark:border-white/15 dark:bg-black/90"
+              }`}
+            >
+              {modoColocar === "punto" ? "Toca el mapa…" : "+ Punto"}
+            </button>
+          </>
+        )}
         <button
           type="button"
-          onClick={handleBoundaryButton}
-          className={`rounded-full px-4 py-3 text-xs font-medium shadow ${
-            boundaryState !== "idle"
-              ? "bg-amber-600 text-white"
-              : "border border-black/10 bg-white/95 text-foreground dark:border-white/15 dark:bg-black/90"
-          }`}
+          onClick={() => setMenuAbierto((v) => !v)}
+          aria-label={menuAbierto ? "Cerrar menú del mapa" : "Abrir menú del mapa"}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-800 text-2xl leading-none text-white shadow-lg"
         >
-          {boundaryState === "idle" && "Editar linde"}
-          {boundaryState === "dibujando" && "Cancelar"}
-          {boundaryState === "editando" && "Guardar linde"}
-        </button>
-        <button
-          type="button"
-          onClick={() => toggleModoColocar("captura")}
-          className={`rounded-full px-4 py-3 text-xs font-medium shadow ${
-            modoColocar === "captura"
-              ? "bg-emerald-800 text-white"
-              : "border border-black/10 bg-white/95 text-foreground dark:border-white/15 dark:bg-black/90"
-          }`}
-        >
-          {modoColocar === "captura" ? "Toca el mapa…" : "🐗 + Captura"}
-        </button>
-        <button
-          type="button"
-          onClick={() => toggleModoColocar("punto")}
-          className={`rounded-full px-4 py-3 text-xs font-medium shadow ${
-            modoColocar === "punto"
-              ? "bg-emerald-800 text-white"
-              : "border border-black/10 bg-white/95 text-foreground dark:border-white/15 dark:bg-black/90"
-          }`}
-        >
-          {modoColocar === "punto" ? "Toca el mapa…" : "+ Punto"}
-        </button>
-        <button
-          type="button"
-          onClick={() => setPegarUbicacionAbierto(true)}
-          className="rounded-full border border-black/10 bg-white/95 px-4 py-3 text-xs font-medium text-foreground shadow dark:border-white/15 dark:bg-black/90"
-        >
-          📍 Desde enlace
+          {menuAbierto ? "×" : "+"}
         </button>
       </div>
 
@@ -435,13 +462,6 @@ export function FincaMap() {
 
       {capturaCrearEn && (
         <CapturaForm onSubmit={handleCapturaSubmit} onCancel={() => setCapturaCrearEn(null)} />
-      )}
-
-      {pegarUbicacionAbierto && (
-        <PegarUbicacionForm
-          onResolved={handleUbicacionPegadaResuelta}
-          onCancel={() => setPegarUbicacionAbierto(false)}
-        />
       )}
 
       {capturaDetalle && (
