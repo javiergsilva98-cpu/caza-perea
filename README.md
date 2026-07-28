@@ -85,18 +85,22 @@ instalación como PWA y el service worker hace falta HTTPS o `localhost`
 
 1. Importa el repo de GitHub en Vercel — el framework preset `Next.js` se
    detecta solo.
-2. Añade las variables de entorno `NEXT_PUBLIC_SUPABASE_URL` y
-   `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Production, Preview y Development) con
-   los valores de Supabase → Project Settings → API.
+2. Añade las variables de entorno `NEXT_PUBLIC_SUPABASE_URL`,
+   `NEXT_PUBLIC_SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` (Production,
+   Preview y Development) con los valores de Supabase → Project Settings →
+   API. La última es solo para el servidor (nunca `NEXT_PUBLIC_`) y hace
+   falta para poder invitar cazadores desde la app.
 3. Cada push a `main` despliega automáticamente.
 
 ## Autenticación
 
-- Login con email + contraseña (Supabase Auth). No hay registro público: los
-  tres usuarios se crean a mano desde el dashboard de Supabase.
-- Roles: `admin` (gestión completa) y `cazador` (acceso simple). El primer
-  usuario debe promocionarse a `admin` a mano tras crearse — ver
-  `supabase/README.md`.
+- Login con email + contraseña (Supabase Auth). No hay registro público: un
+  admin invita a cada cazador desde Perfil → "+ Invitar cazador" (crea la
+  cuenta con una contraseña temporal que se le pasa a mano). El primer
+  usuario (el primer admin) se crea y se promociona a mano desde el
+  dashboard de Supabase — ver `supabase/README.md`.
+- Roles: `admin` (gestión completa, incluida la invitación de más usuarios)
+  y `cazador` (acceso simple).
 - `src/proxy.ts` protege todas las rutas salvo `/login` y los assets de la
   PWA, redirigiendo a `/login` si no hay sesión.
 
