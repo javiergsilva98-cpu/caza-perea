@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://caza-perea.vercel.app"),
   title: "Casa Perea — Coto CU10053",
   description: "Gestión del coto de caza CU10053 (Cuenca) — Casa Perea.",
   appleWebApp: {
