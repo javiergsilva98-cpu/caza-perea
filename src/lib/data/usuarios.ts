@@ -1,8 +1,21 @@
 import { createClient } from "@/lib/supabase/client";
 
-export async function listUsuariosNombres(): Promise<Record<string, string>> {
+export interface UsuarioBasico {
+  id: string;
+  nombre: string;
+}
+
+export async function listUsuarios(): Promise<UsuarioBasico[]> {
   const supabase = createClient();
-  const { data, error } = await supabase.from("usuarios").select("id, nombre");
-  if (error || !data) return {};
-  return Object.fromEntries(data.map((u) => [u.id, u.nombre]));
+  const { data, error } = await supabase
+    .from("usuarios")
+    .select("id, nombre")
+    .order("nombre", { ascending: true });
+  if (error || !data) return [];
+  return data;
+}
+
+export async function listUsuariosNombres(): Promise<Record<string, string>> {
+  const usuarios = await listUsuarios();
+  return Object.fromEntries(usuarios.map((u) => [u.id, u.nombre]));
 }

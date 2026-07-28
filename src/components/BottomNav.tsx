@@ -8,6 +8,7 @@ const ITEMS = [
   { href: "/mapa", label: "Mapa", icon: "🗺️" },
   { href: "/capturas", label: "Capturas", icon: "🎯" },
   { href: "/actividades", label: "Actividad", icon: "🧰" },
+  { href: "/esperas", label: "Esperas", icon: "🪑" },
   { href: "/perfil", label: "Perfil", icon: "👤" },
 ] as const;
 

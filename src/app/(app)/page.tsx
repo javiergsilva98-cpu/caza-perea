@@ -30,9 +30,9 @@ export default async function HomePage() {
 
       <div className="rounded-xl border border-black/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5">
         <p className="text-sm text-foreground/70">
-          Infraestructura lista. El mapa, las capturas y las actividades
-          llegarán en los próximos sprints — usa la navegación de abajo para
-          ver el hueco reservado a cada sección.
+          Usa la navegación de abajo: mapa de la finca, capturas y
+          avistamientos, mantenimiento de comederos/bebederos, y reparto de
+          esperas. El control de gastos llega en el próximo sprint.
         </p>
       </div>
     </div>

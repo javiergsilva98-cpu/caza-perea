@@ -213,6 +213,55 @@ export interface Database {
           },
         ];
       };
+      esperas: {
+        Row: {
+          id: string;
+          puesto_id: string;
+          cazador_id: string;
+          fecha: string;
+          notas: string | null;
+          asignado_por: string;
+          fecha_registro: string;
+        };
+        Insert: {
+          id?: string;
+          puesto_id: string;
+          cazador_id: string;
+          fecha: string;
+          notas?: string | null;
+          asignado_por?: string;
+          fecha_registro?: string;
+        };
+        Update: {
+          id?: string;
+          puesto_id?: string;
+          cazador_id?: string;
+          fecha?: string;
+          notas?: string | null;
+          asignado_por?: string;
+          fecha_registro?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "esperas_puesto_id_fkey";
+            columns: ["puesto_id"];
+            referencedRelation: "puntos_interes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "esperas_cazador_id_fkey";
+            columns: ["cazador_id"];
+            referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "esperas_asignado_por_fkey";
+            columns: ["asignado_por"];
+            referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       finca_limite_actual: {
