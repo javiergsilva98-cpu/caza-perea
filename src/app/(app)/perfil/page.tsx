@@ -20,7 +20,7 @@ export default async function PerfilPage() {
     .single();
 
   return (
-    <div className="flex flex-1 flex-col gap-6 px-4 py-6">
+    <div className="flex flex-1 flex-col gap-6 px-4 py-6 pb-24">
       <h1 className="text-xl font-semibold text-ink">Perfil</h1>
 
       <dl className="flex flex-col gap-3 rounded-xl border border-border bg-bg-card p-4 text-sm">

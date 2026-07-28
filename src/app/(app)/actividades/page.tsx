@@ -101,7 +101,7 @@ export default function ActividadesPage() {
         <SyncBadge />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className="flex-1 overflow-y-auto px-4 py-4 pb-24">
         <h1 className="text-xl font-semibold text-ink">Actividad y mantenimiento</h1>
 
         {!loading && resumen.length > 0 && (
@@ -166,7 +166,7 @@ export default function ActividadesPage() {
         </ul>
       </div>
 
-      <div className="absolute bottom-4 right-4 z-20 flex flex-col items-end gap-2">
+      <div className="absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-20 flex flex-col items-end gap-2">
         <button
           type="button"
           onClick={() => setPegarUbicacionAbierto(true)}

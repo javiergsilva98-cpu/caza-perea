@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { BottomNav } from "@/components/BottomNav";
+import { AppNav } from "@/components/AppNav";
 import { AppHeader } from "@/components/AppHeader";
 
 export default async function AppLayout({
@@ -23,7 +23,7 @@ export default async function AppLayout({
 
       <main className="flex flex-1 flex-col overflow-y-auto">{children}</main>
 
-      <BottomNav />
+      <AppNav />
     </div>
   );
 }

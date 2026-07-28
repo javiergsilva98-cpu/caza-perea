@@ -74,7 +74,7 @@ export default function CapturasPage() {
         <SyncBadge />
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className="flex-1 overflow-y-auto px-4 py-4 pb-24">
         <h1 className="text-xl font-semibold text-ink">Capturas y avistamientos</h1>
 
         {loading && <p className="mt-4 text-sm text-ink-soft">Cargando…</p>}
@@ -118,7 +118,7 @@ export default function CapturasPage() {
         </ul>
       </div>
 
-      <div className="absolute bottom-4 right-4 z-20 flex flex-col items-end gap-2">
+      <div className="absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-20 flex flex-col items-end gap-2">
         <button
           type="button"
           onClick={() => setPegarUbicacionAbierto(true)}

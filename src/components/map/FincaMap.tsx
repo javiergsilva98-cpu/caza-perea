@@ -381,7 +381,7 @@ export function FincaMap() {
         </div>
       )}
 
-      <div className="absolute bottom-24 right-3 z-20 flex flex-col items-end gap-2">
+      <div className="absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] right-3 z-20 flex flex-col items-end gap-2">
         {(menuAbierto || boundaryState !== "idle" || modoColocar !== null) && (
           <>
             <button
