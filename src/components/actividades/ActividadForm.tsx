@@ -27,11 +27,13 @@ function hoyISO() {
 export function ActividadForm({
   puntos,
   puntoPreseleccionado,
+  fechaPreseleccionada,
   onSubmit,
   onCancel,
 }: {
   puntos: PuntoInteresRow[];
   puntoPreseleccionado?: string;
+  fechaPreseleccionada?: string;
   onSubmit: (values: ActividadFormValues) => void | Promise<void>;
   onCancel: () => void;
 }) {
@@ -39,7 +41,7 @@ export function ActividadForm({
     puntoPreseleccionado ?? puntos[0]?.id ?? ""
   );
   const [tipo, setTipo] = useState<TipoActividad>("rellenado");
-  const [fecha, setFecha] = useState(hoyISO());
+  const [fecha, setFecha] = useState(fechaPreseleccionada ?? hoyISO());
   const [proximaFecha, setProximaFecha] = useState("");
   const [notas, setNotas] = useState("");
   const [saving, setSaving] = useState(false);

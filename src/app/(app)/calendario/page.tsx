@@ -3,15 +3,22 @@
 import { useEffect, useMemo, useState } from "react";
 import { listAsistencias, marcarAsistencia, quitarAsistencia } from "@/lib/data/calendario";
 import { listCapturas } from "@/lib/data/capturas";
-import { listActividades } from "@/lib/data/actividades";
+import { listActividades, crearActividad } from "@/lib/data/actividades";
 import { listEsperas } from "@/lib/data/esperas";
 import { listPuntosInteres } from "@/lib/data/puntos-interes";
 import { listUsuarios, type UsuarioBasico } from "@/lib/data/usuarios";
 import { startSyncTriggers } from "@/lib/sync/sync-manager";
 import { createClient } from "@/lib/supabase/client";
-import type { ActividadRow, CalendarioAsistenciaRow, CapturaRow, EsperaRow } from "@/lib/offline/db";
+import type {
+  ActividadRow,
+  CalendarioAsistenciaRow,
+  CapturaRow,
+  EsperaRow,
+  PuntoInteresRow,
+} from "@/lib/offline/db";
 import { construirMes, NOMBRE_MES, DIA_SEMANA_CORTO } from "@/lib/calendario-utils";
 import { DiaDetalle } from "@/components/calendario/DiaDetalle";
+import { ActividadForm, type ActividadFormValues } from "@/components/actividades/ActividadForm";
 import { SyncBadge } from "@/components/map/SyncBadge";
 
 export default function CalendarioPage() {
@@ -24,9 +31,10 @@ export default function CalendarioPage() {
   const [actividades, setActividades] = useState<ActividadRow[]>([]);
   const [esperas, setEsperas] = useState<EsperaRow[]>([]);
   const [usuarios, setUsuarios] = useState<UsuarioBasico[]>([]);
-  const [puntoNombrePorId, setPuntoNombrePorId] = useState<Record<string, string>>({});
+  const [puntos, setPuntos] = useState<PuntoInteresRow[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [diaSeleccionado, setDiaSeleccionado] = useState<string | null>(null);
+  const [actividadEnFecha, setActividadEnFecha] = useState<string | null>(null);
   const [cambiandoAsistencia, setCambiandoAsistencia] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -53,7 +61,7 @@ export default function CalendarioPage() {
       setActividades(listaActividades);
       setEsperas(listaEsperas);
       setUsuarios(listaUsuarios);
-      setPuntoNombrePorId(Object.fromEntries(listaPuntos.map((p) => [p.id, p.nombre])));
+      setPuntos(listaPuntos);
       setLoading(false);
     })();
   }, []);
@@ -61,6 +69,10 @@ export default function CalendarioPage() {
   const nombrePorId = useMemo(
     () => Object.fromEntries(usuarios.map((u) => [u.id, u.nombre])),
     [usuarios]
+  );
+  const puntoNombrePorId = useMemo(
+    () => Object.fromEntries(puntos.map((p) => [p.id, p.nombre])),
+    [puntos]
   );
 
   const semanas = useMemo(() => construirMes(anio, mes), [anio, mes]);
@@ -92,6 +104,12 @@ export default function CalendarioPage() {
     } finally {
       setCambiandoAsistencia(false);
     }
+  }
+
+  async function handleCrearActividad(values: ActividadFormValues) {
+    const row = await crearActividad(values);
+    setActividades((prev) => [row, ...prev]);
+    setActividadEnFecha(null);
   }
 
   const dia = diaSeleccionado
@@ -203,12 +221,25 @@ export default function CalendarioPage() {
           yoAsisto={!!userId && dia.asistentes.some((a) => a.id === userId)}
           cambiandoAsistencia={cambiandoAsistencia}
           onToggleAsistencia={() => void handleToggleAsistencia()}
+          onAnadirActividad={() => {
+            setActividadEnFecha(dia.fecha);
+            setDiaSeleccionado(null);
+          }}
           capturas={dia.capturas}
           actividades={dia.actividades}
           esperas={dia.esperas}
           nombres={nombrePorId}
           puntoNombrePorId={puntoNombrePorId}
           onClose={() => setDiaSeleccionado(null)}
+        />
+      )}
+
+      {actividadEnFecha && (
+        <ActividadForm
+          puntos={puntos}
+          fechaPreseleccionada={actividadEnFecha}
+          onSubmit={handleCrearActividad}
+          onCancel={() => setActividadEnFecha(null)}
         />
       )}
     </div>
