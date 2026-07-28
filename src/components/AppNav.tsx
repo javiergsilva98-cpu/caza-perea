@@ -38,12 +38,11 @@ export function AppNav() {
           <Link
             key={h.href}
             href={h.href}
-            aria-label={h.label}
-            title={h.label}
             onClick={() => setAbierto(false)}
-            className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-bg-card text-xl text-ink shadow"
+            className="flex items-center gap-2 rounded-full border border-border bg-bg-card py-2 pl-3 pr-4 text-sm font-medium text-ink shadow"
           >
-            {h.icon}
+            <span className="text-xl leading-none">{h.icon}</span>
+            {h.label}
           </Link>
         ))}
       <button
