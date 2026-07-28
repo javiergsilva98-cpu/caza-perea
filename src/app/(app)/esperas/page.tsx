@@ -111,14 +111,14 @@ export default function EsperasPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4">
-        <h1 className="text-xl font-semibold text-foreground">Esperas y puestos</h1>
+        <h1 className="text-xl font-semibold text-ink">Esperas y puestos</h1>
 
         {!loading && reparto.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
             {reparto.map(({ usuario, veces }) => (
               <span
                 key={usuario.id}
-                className="rounded-full border border-black/10 bg-white/60 px-3 py-1 text-xs text-foreground/70 dark:border-white/10 dark:bg-white/5"
+                className="rounded-full border border-border bg-bg-card px-3 py-1 text-xs text-ink-soft"
               >
                 {usuario.nombre}: {veces}
               </span>
@@ -126,31 +126,31 @@ export default function EsperasPage() {
           </div>
         )}
 
-        <h2 className="mt-6 text-xs font-medium uppercase tracking-wide text-foreground/50">
+        <h2 className="mt-6 text-xs font-medium uppercase tracking-wide text-ink-soft">
           Próximas
         </h2>
-        {loading && <p className="mt-2 text-sm text-foreground/50">Cargando…</p>}
+        {loading && <p className="mt-2 text-sm text-ink-soft">Cargando…</p>}
         {!loading && proximas.length === 0 && (
-          <p className="mt-2 text-sm text-foreground/50">Nada asignado todavía.</p>
+          <p className="mt-2 text-sm text-ink-soft">Nada asignado todavía.</p>
         )}
         <ul className="mt-2 flex flex-col gap-2">
           {proximas.map((e) => (
             <li
               key={e.id}
-              className="flex items-start justify-between gap-2 rounded-xl border border-black/10 bg-white/60 p-3 dark:border-white/10 dark:bg-white/5"
+              className="flex items-start justify-between gap-2 rounded-xl border border-border bg-bg-card p-3"
             >
               <div>
-                <span className="text-sm font-medium text-foreground">
+                <span className="text-sm font-medium text-ink">
                   🪑 {puestoPorId[e.puesto_id] ?? "Puesto eliminado"} — {nombrePorId[e.cazador_id] ?? "—"}
                 </span>
-                <p className="mt-0.5 text-xs text-foreground/50">{formatFecha(e.fecha)}</p>
-                {e.notas && <p className="mt-1 text-sm text-foreground/70">{e.notas}</p>}
+                <p className="mt-0.5 text-xs text-ink-soft">{formatFecha(e.fecha)}</p>
+                {e.notas && <p className="mt-1 text-sm text-ink-soft">{e.notas}</p>}
               </div>
               {(e.asignado_por === userId || e.cazador_id === userId) && (
                 <button
                   type="button"
                   onClick={() => void handleDelete(e.id)}
-                  className="shrink-0 text-xs text-red-600 dark:text-red-400"
+                  className="shrink-0 text-xs text-alert"
                 >
                   Quitar
                 </button>
@@ -161,14 +161,14 @@ export default function EsperasPage() {
 
         {historial.length > 0 && (
           <>
-            <h2 className="mt-6 text-xs font-medium uppercase tracking-wide text-foreground/50">
+            <h2 className="mt-6 text-xs font-medium uppercase tracking-wide text-ink-soft">
               Historial
             </h2>
             <ul className="mt-2 flex flex-col gap-2">
               {historial.map((e) => (
                 <li
                   key={e.id}
-                  className="rounded-xl border border-black/10 bg-white/40 p-3 text-sm text-foreground/60 dark:border-white/10 dark:bg-white/5"
+                  className="rounded-xl border border-border bg-bg-card/60 p-3 text-sm text-ink-soft"
                 >
                   {puestoPorId[e.puesto_id] ?? "Puesto eliminado"} — {nombrePorId[e.cazador_id] ?? "—"} ·{" "}
                   {formatFecha(e.fecha)}
@@ -186,9 +186,11 @@ export default function EsperasPage() {
             setFormError(null);
             setShowForm(true);
           }}
-          className="rounded-full bg-emerald-800 px-5 py-3 text-sm font-medium text-white shadow"
+          aria-label="Asignar puesto"
+          title="Asignar puesto"
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-2xl leading-none text-white shadow-lg"
         >
-          + Asignar
+          +
         </button>
       </div>
 

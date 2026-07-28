@@ -61,7 +61,7 @@ export function InvitarUsuarioPanel() {
       <button
         type="button"
         onClick={() => setAbierto(true)}
-        className="w-full rounded-lg border border-black/10 px-4 py-3 text-sm font-medium text-foreground dark:border-white/15"
+        className="w-full rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
       >
         + Invitar cazador
       </button>
@@ -70,28 +70,28 @@ export function InvitarUsuarioPanel() {
 
   if (resultado) {
     return (
-      <div className="rounded-xl border border-emerald-700/30 bg-emerald-800/5 p-4">
-        <p className="text-sm font-medium text-foreground">
+      <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+        <p className="text-sm font-medium text-ink">
           Cuenta creada para {resultado.email}
         </p>
-        <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">
+        <p className="mt-1 text-xs text-alert">
           Guarda o comparte esto ahora — no se puede volver a ver.
         </p>
-        <pre className="mt-3 whitespace-pre-wrap rounded-lg bg-white/70 p-3 text-xs text-foreground dark:bg-black/30">
+        <pre className="mt-3 whitespace-pre-wrap rounded-lg bg-bg-card p-3 text-xs text-ink">
           {mensajeCompartir}
         </pre>
         <div className="mt-3 flex gap-2">
           <button
             type="button"
             onClick={reiniciar}
-            className="flex-1 rounded-lg border border-black/10 px-4 py-3 text-sm font-medium text-foreground dark:border-white/15"
+            className="flex-1 rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
           >
             Cerrar
           </button>
           <button
             type="button"
             onClick={copiarMensaje}
-            className="flex-1 rounded-lg bg-emerald-800 px-4 py-3 text-sm font-medium text-white"
+            className="flex-1 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-white"
           >
             {copiado ? "Copiado ✓" : "Copiar mensaje"}
           </button>
@@ -103,12 +103,12 @@ export function InvitarUsuarioPanel() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-3 rounded-xl border border-black/10 bg-white/60 p-4 dark:border-white/10 dark:bg-white/5"
+      className="flex flex-col gap-3 rounded-xl border border-border bg-bg-card p-4"
     >
-      <p className="text-sm font-medium text-foreground">Invitar cazador</p>
+      <p className="text-sm font-medium text-ink">Invitar cazador</p>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="invitar-nombre" className="text-xs font-medium text-foreground/70">
+        <label htmlFor="invitar-nombre" className="text-xs font-medium text-ink-soft">
           Nombre
         </label>
         <input
@@ -116,12 +116,12 @@ export function InvitarUsuarioPanel() {
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
           required
-          className="rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+          className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
         />
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="invitar-email" className="text-xs font-medium text-foreground/70">
+        <label htmlFor="invitar-email" className="text-xs font-medium text-ink-soft">
           Email
         </label>
         <input
@@ -130,11 +130,11 @@ export function InvitarUsuarioPanel() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+          className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
         />
       </div>
 
-      <label className="flex items-center gap-2 text-sm text-foreground/70">
+      <label className="flex items-center gap-2 text-sm text-ink-soft">
         <input
           type="checkbox"
           checked={comoAdmin}
@@ -143,20 +143,20 @@ export function InvitarUsuarioPanel() {
         Darle también rol de administrador
       </label>
 
-      {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+      {error && <p className="text-sm text-alert">{error}</p>}
 
       <div className="flex gap-2">
         <button
           type="button"
           onClick={reiniciar}
-          className="flex-1 rounded-lg border border-black/10 px-4 py-3 text-sm font-medium text-foreground dark:border-white/15"
+          className="flex-1 rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
         >
           Cancelar
         </button>
         <button
           type="submit"
           disabled={enviando}
-          className="flex-1 rounded-lg bg-emerald-800 px-4 py-3 text-sm font-medium text-white disabled:opacity-60"
+          className="flex-1 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-white disabled:opacity-60"
         >
           {enviando ? "Creando…" : "Crear cuenta"}
         </button>

@@ -32,7 +32,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#14532d",
+  themeColor: "#4a5d3a",
 };
 
 export default function RootLayout({
@@ -45,7 +45,7 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-dvh flex-col bg-background text-foreground">
+      <body className="flex min-h-dvh flex-col bg-bg text-ink">
         {children}
         <ServiceWorkerRegister />
       </body>

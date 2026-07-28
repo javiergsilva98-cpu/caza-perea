@@ -54,10 +54,10 @@ export function PegarUbicacionForm({
 
   return (
     <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-      <div className="rounded-t-2xl bg-background p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-black/15 dark:bg-white/20" />
-        <h2 className="text-base font-semibold text-foreground">Pegar ubicación</h2>
-        <p className="mt-1 text-xs text-foreground/50">
+      <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-soft/30" />
+        <h2 className="text-base font-semibold text-ink">Pegar ubicación</h2>
+        <p className="mt-1 text-xs text-ink-soft">
           Un enlace de Google Maps (largo o corto tipo maps.app.goo.gl) o unas
           coordenadas, en cualquier formato.
         </p>
@@ -69,23 +69,23 @@ export function PegarUbicacionForm({
             rows={3}
             autoFocus
             placeholder="https://maps.app.goo.gl/... o 39°38'16.1&quot;N 2°51'22.8&quot;W"
-            className="resize-none rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+            className="resize-none rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
           />
 
-          {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+          {error && <p className="text-sm text-alert">{error}</p>}
 
           <div className="flex gap-2">
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 rounded-lg border border-black/10 px-4 py-3 text-sm font-medium text-foreground dark:border-white/15"
+              className="flex-1 rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={buscando}
-              className="flex-1 rounded-lg bg-emerald-800 px-4 py-3 text-sm font-medium text-white disabled:opacity-60"
+              className="flex-1 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-white disabled:opacity-60"
             >
               {buscando ? "Buscando…" : "Buscar"}
             </button>

@@ -58,9 +58,9 @@ export function CapturaForm({
 
   return (
     <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-      <div className="rounded-t-2xl bg-background p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-black/15 dark:bg-white/20" />
-        <h2 className="text-base font-semibold text-foreground">Nueva captura/avistamiento</h2>
+      <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-soft/30" />
+        <h2 className="text-base font-semibold text-ink">Nueva captura/avistamiento</h2>
 
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-2">
@@ -69,8 +69,8 @@ export function CapturaForm({
               onClick={() => setTipo("captura")}
               className={`rounded-lg border px-3 py-3 text-sm font-medium ${
                 tipo === "captura"
-                  ? "border-emerald-700 bg-emerald-800/10 text-emerald-800 dark:text-emerald-400"
-                  : "border-black/10 text-foreground/70 dark:border-white/15"
+                  ? "border-secondary bg-secondary/10 text-secondary"
+                  : "border-border text-ink-soft"
               }`}
             >
               🎯 Captura
@@ -80,8 +80,8 @@ export function CapturaForm({
               onClick={() => setTipo("avistamiento")}
               className={`rounded-lg border px-3 py-3 text-sm font-medium ${
                 tipo === "avistamiento"
-                  ? "border-emerald-700 bg-emerald-800/10 text-emerald-800 dark:text-emerald-400"
-                  : "border-black/10 text-foreground/70 dark:border-white/15"
+                  ? "border-secondary bg-secondary/10 text-secondary"
+                  : "border-border text-ink-soft"
               }`}
             >
               👁 Avistamiento
@@ -89,7 +89,7 @@ export function CapturaForm({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="especie" className="text-sm font-medium text-foreground">
+            <label htmlFor="especie" className="text-sm font-medium text-ink">
               Especie
             </label>
             <input
@@ -99,7 +99,7 @@ export function CapturaForm({
               onChange={(e) => setEspecie(e.target.value)}
               required
               placeholder="Jabalí, conejo, perdiz…"
-              className="rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+              className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
             />
             <datalist id="especies-sugeridas">
               {ESPECIES_SUGERIDAS.map((e) => (
@@ -110,7 +110,7 @@ export function CapturaForm({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
-              <label htmlFor="cantidad" className="text-sm font-medium text-foreground">
+              <label htmlFor="cantidad" className="text-sm font-medium text-ink">
                 Cantidad
               </label>
               <input
@@ -119,11 +119,11 @@ export function CapturaForm({
                 min={1}
                 value={cantidad}
                 onChange={(e) => setCantidad(Math.max(1, Number(e.target.value) || 1))}
-                className="rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+                className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label htmlFor="fecha" className="text-sm font-medium text-foreground">
+              <label htmlFor="fecha" className="text-sm font-medium text-ink">
                 Fecha
               </label>
               <input
@@ -131,13 +131,13 @@ export function CapturaForm({
                 type="date"
                 value={fecha}
                 onChange={(e) => setFecha(e.target.value)}
-                className="rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+                className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
               />
             </div>
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="captura-notas" className="text-sm font-medium text-foreground">
+            <label htmlFor="captura-notas" className="text-sm font-medium text-ink">
               Notas
             </label>
             <textarea
@@ -145,7 +145,7 @@ export function CapturaForm({
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
               rows={3}
-              className="resize-none rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+              className="resize-none rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
             />
           </div>
 
@@ -153,14 +153,14 @@ export function CapturaForm({
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 rounded-lg border border-black/10 px-4 py-3 text-sm font-medium text-foreground dark:border-white/15"
+              className="flex-1 rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 rounded-lg bg-emerald-800 px-4 py-3 text-sm font-medium text-white disabled:opacity-60"
+              className="flex-1 rounded-lg bg-secondary px-4 py-3 text-sm font-medium text-white disabled:opacity-60"
             >
               {saving ? "Guardando…" : "Guardar"}
             </button>

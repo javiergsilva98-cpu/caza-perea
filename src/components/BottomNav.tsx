@@ -16,7 +16,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="sticky bottom-0 z-10 flex items-end border-t border-black/10 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur dark:border-white/10 dark:bg-black/95"
+      className="sticky bottom-0 z-10 flex items-end border-t border-border bg-bg-card pb-[env(safe-area-inset-bottom)] backdrop-blur"
       aria-label="Navegación principal"
     >
       {ITEMS.map((item) => {
@@ -27,7 +27,7 @@ export function BottomNav() {
             key={item.href}
             href={item.href}
             className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-xs ${
-              active ? "text-emerald-800 dark:text-emerald-400" : "text-foreground/50"
+              active ? "text-primary" : "text-ink-soft"
             }`}
             aria-current={active ? "page" : undefined}
           >
@@ -35,9 +35,7 @@ export function BottomNav() {
               className={
                 esMapa
                   ? `-mt-4 flex h-12 w-12 items-center justify-center rounded-full text-2xl leading-none shadow ${
-                      active
-                        ? "bg-emerald-800 text-white"
-                        : "bg-emerald-800/90 text-white"
+                      active ? "bg-primary text-white" : "bg-primary/90 text-white"
                     }`
                   : "text-lg leading-none"
               }
