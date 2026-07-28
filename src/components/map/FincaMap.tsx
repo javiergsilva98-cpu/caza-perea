@@ -387,55 +387,44 @@ export function FincaMap() {
             <button
               type="button"
               onClick={handleBoundaryButton}
-              aria-label={
-                boundaryState === "idle"
-                  ? "Editar linde"
-                  : boundaryState === "dibujando"
-                    ? "Cancelar dibujo de la linde"
-                    : "Guardar linde"
-              }
-              title={
-                boundaryState === "idle"
-                  ? "Editar linde"
-                  : boundaryState === "dibujando"
-                    ? "Cancelar"
-                    : "Guardar linde"
-              }
-              className={`flex h-12 w-12 items-center justify-center rounded-full text-xl shadow ${
+              className={`flex items-center gap-2 rounded-full py-2 pl-3 pr-4 text-sm font-medium shadow ${
                 boundaryState !== "idle"
                   ? "bg-alert text-white"
                   : "border border-border bg-bg-card text-ink"
               }`}
             >
-              {boundaryState === "idle" && "✏️"}
-              {boundaryState === "dibujando" && "✕"}
-              {boundaryState === "editando" && "✓"}
+              <span className="text-xl leading-none">
+                {boundaryState === "idle" && "✏️"}
+                {boundaryState === "dibujando" && "✕"}
+                {boundaryState === "editando" && "✓"}
+              </span>
+              {boundaryState === "idle" && "Editar linde"}
+              {boundaryState === "dibujando" && "Cancelar"}
+              {boundaryState === "editando" && "Guardar linde"}
             </button>
             <button
               type="button"
               onClick={() => toggleModoColocar("captura")}
-              aria-label={modoColocar === "captura" ? "Toca el mapa para registrar la captura" : "Añadir captura"}
-              title="Añadir captura"
-              className={`flex h-12 w-12 items-center justify-center rounded-full text-xl shadow ${
+              className={`flex items-center gap-2 rounded-full py-2 pl-3 pr-4 text-sm font-medium shadow ${
                 modoColocar === "captura"
                   ? "bg-secondary text-white"
                   : "border border-border bg-bg-card text-ink"
               }`}
             >
-              🐗
+              <span className="text-xl leading-none">🐗</span>
+              {modoColocar === "captura" ? "Toca el mapa" : "Añadir captura"}
             </button>
             <button
               type="button"
               onClick={() => toggleModoColocar("punto")}
-              aria-label={modoColocar === "punto" ? "Toca el mapa para añadir el punto" : "Añadir punto"}
-              title="Añadir punto"
-              className={`flex h-12 w-12 items-center justify-center rounded-full text-xl shadow ${
+              className={`flex items-center gap-2 rounded-full py-2 pl-3 pr-4 text-sm font-medium shadow ${
                 modoColocar === "punto"
                   ? "bg-primary text-white"
                   : "border border-border bg-bg-card text-ink"
               }`}
             >
-              📍
+              <span className="text-xl leading-none">📍</span>
+              {modoColocar === "punto" ? "Toca el mapa" : "Añadir punto"}
             </button>
           </>
         )}
