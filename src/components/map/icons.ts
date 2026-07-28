@@ -5,6 +5,7 @@ const EMOJI: Record<TipoPuntoInteres, string> = {
   comedero: "🌾",
   bebedero: "💧",
   puesto: "🎯",
+  casa: "🏠",
   otro: "📍",
 };
 
@@ -12,6 +13,7 @@ export const TIPO_LABEL: Record<TipoPuntoInteres, string> = {
   comedero: "Comedero",
   bebedero: "Bebedero",
   puesto: "Puesto",
+  casa: "Casa",
   otro: "Otro",
 };
 

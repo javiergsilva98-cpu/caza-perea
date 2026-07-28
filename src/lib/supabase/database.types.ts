@@ -7,7 +7,7 @@ export type Json =
   | Json[];
 
 export type RolUsuario = "admin" | "cazador";
-export type TipoPuntoInteres = "comedero" | "bebedero" | "puesto" | "otro";
+export type TipoPuntoInteres = "comedero" | "bebedero" | "puesto" | "casa" | "otro";
 export type TipoCaptura = "captura" | "avistamiento";
 export type TipoActividad = "rellenado" | "revision" | "reparacion" | "otro";
 export type TipoDocumento = "seguro" | "licencia";
