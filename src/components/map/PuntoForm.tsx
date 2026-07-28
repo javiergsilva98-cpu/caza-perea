@@ -12,6 +12,14 @@ export interface PuntoFormValues {
   notas: string | null;
 }
 
+function formatFecha(iso: string) {
+  return new Date(iso).toLocaleDateString("es-ES", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 export function PuntoForm({
   titulo,
   inicial,
@@ -21,6 +29,8 @@ export function PuntoForm({
   onDelete,
   onCancel,
   onRegistrarActividad,
+  creadoPorNombre,
+  fechaCreacion,
 }: {
   titulo: string;
   inicial: PuntoFormValues;
@@ -30,6 +40,8 @@ export function PuntoForm({
   onDelete?: () => void | Promise<void>;
   onCancel: () => void;
   onRegistrarActividad?: () => void;
+  creadoPorNombre?: string;
+  fechaCreacion?: string;
 }) {
   const [nombre, setNombre] = useState(inicial.nombre);
   const [tipo, setTipo] = useState<TipoPuntoInteres>(inicial.tipo);
@@ -52,6 +64,11 @@ export function PuntoForm({
       <div className="rounded-t-2xl bg-background p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-black/15 dark:bg-white/20" />
         <h2 className="text-base font-semibold text-foreground">{titulo}</h2>
+        {creadoPorNombre && fechaCreacion && (
+          <p className="mt-0.5 text-xs text-foreground/50">
+            Añadido por {creadoPorNombre} · {formatFecha(fechaCreacion)}
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
           <div className="flex flex-col gap-1">
