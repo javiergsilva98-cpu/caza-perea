@@ -3,8 +3,14 @@ import type { Database } from "@/lib/supabase/database.types";
 
 export type PuntoInteresRow = Database["public"]["Tables"]["puntos_interes"]["Row"];
 export type FincaLimiteRow = Database["public"]["Tables"]["finca_limite"]["Row"];
+export type CapturaRow = Database["public"]["Tables"]["capturas_avistamientos"]["Row"];
+export type ActividadRow = Database["public"]["Tables"]["actividades"]["Row"];
 
-export type OutboxEntity = "punto_interes" | "finca_limite";
+export type OutboxEntity =
+  | "punto_interes"
+  | "finca_limite"
+  | "captura_avistamiento"
+  | "actividad";
 export type OutboxOp = "insert" | "update" | "delete";
 
 export interface OutboxEntry {
@@ -28,6 +34,8 @@ export interface SyncErrorEntry {
 class CasaPereaDB extends Dexie {
   puntosInteres!: Table<PuntoInteresRow, string>;
   fincaLimiteActual!: Table<FincaLimiteRow, string>;
+  capturas!: Table<CapturaRow, string>;
+  actividades!: Table<ActividadRow, string>;
   outbox!: Table<OutboxEntry, number>;
   syncErrors!: Table<SyncErrorEntry, number>;
 
@@ -39,6 +47,12 @@ class CasaPereaDB extends Dexie {
       fincaLimiteActual: "id",
       outbox: "++id, entity, rowId, createdAt",
       syncErrors: "++id, entity, rowId, occurredAt",
+    });
+    // v2 (Sprint 2): capturas/avistamientos y actividades. Los stores de la
+    // v1 se mantienen automáticamente, solo se añaden los nuevos.
+    this.version(2).stores({
+      capturas: "id, fecha",
+      actividades: "id, punto_interes_id, fecha",
     });
   }
 }

@@ -30,41 +30,37 @@ function isNetworkError(error: unknown): boolean {
   return error instanceof TypeError;
 }
 
+const TABLE_BY_ENTITY = {
+  punto_interes: "puntos_interes",
+  finca_limite: "finca_limite",
+  captura_avistamiento: "capturas_avistamientos",
+  actividad: "actividades",
+} as const;
+
+// finca_limite es de solo-inserción: cada edición crea una versión nueva
+// (nunca update/delete a través del outbox).
 async function applyEntry(
   supabase: ReturnType<typeof createClient>,
   entry: OutboxEntry
 ) {
-  if (entry.entity === "punto_interes") {
-    if (entry.op === "insert") {
-      const { error } = await supabase
-        .from("puntos_interes")
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .insert(entry.payload as any);
-      if (error) throw error;
-      return;
-    }
-    if (entry.op === "update") {
-      const { error } = await supabase
-        .from("puntos_interes")
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .update(entry.payload as any)
-        .eq("id", entry.rowId);
-      if (error) throw error;
-      return;
-    }
+  const table = TABLE_BY_ENTITY[entry.entity];
+
+  if (entry.op === "insert") {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await supabase.from(table).insert(entry.payload as any);
+    if (error) throw error;
+    return;
+  }
+  if (entry.op === "update") {
     const { error } = await supabase
-      .from("puntos_interes")
-      .delete()
+      .from(table)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .update(entry.payload as any)
       .eq("id", entry.rowId);
     if (error) throw error;
     return;
   }
-
-  // finca_limite es de solo-inserción: cada edición crea una versión nueva.
-  const { error } = await supabase
-    .from("finca_limite")
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .insert(entry.payload as any);
+  const { error } = await supabase.from(table).delete().eq("id", entry.rowId);
   if (error) throw error;
 }
 

@@ -8,6 +8,8 @@ export type Json =
 
 export type RolUsuario = "admin" | "cazador";
 export type TipoPuntoInteres = "comedero" | "bebedero" | "puesto" | "otro";
+export type TipoCaptura = "captura" | "avistamiento";
+export type TipoActividad = "rellenado" | "revision" | "reparacion" | "otro";
 
 export interface Database {
   public: {
@@ -103,6 +105,110 @@ export interface Database {
             foreignKeyName: "finca_limite_actualizado_por_fkey";
             columns: ["actualizado_por"];
             referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      capturas_avistamientos: {
+        Row: {
+          id: string;
+          tipo: TipoCaptura;
+          especie: string;
+          cantidad: number;
+          lat: number | null;
+          lng: number | null;
+          punto_interes_id: string | null;
+          notas: string | null;
+          foto_url: string | null;
+          registrado_por: string;
+          fecha: string;
+          fecha_registro: string;
+        };
+        Insert: {
+          id?: string;
+          tipo: TipoCaptura;
+          especie: string;
+          cantidad?: number;
+          lat?: number | null;
+          lng?: number | null;
+          punto_interes_id?: string | null;
+          notas?: string | null;
+          foto_url?: string | null;
+          registrado_por?: string;
+          fecha?: string;
+          fecha_registro?: string;
+        };
+        Update: {
+          id?: string;
+          tipo?: TipoCaptura;
+          especie?: string;
+          cantidad?: number;
+          lat?: number | null;
+          lng?: number | null;
+          punto_interes_id?: string | null;
+          notas?: string | null;
+          foto_url?: string | null;
+          registrado_por?: string;
+          fecha?: string;
+          fecha_registro?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "capturas_avistamientos_registrado_por_fkey";
+            columns: ["registrado_por"];
+            referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "capturas_avistamientos_punto_interes_id_fkey";
+            columns: ["punto_interes_id"];
+            referencedRelation: "puntos_interes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      actividades: {
+        Row: {
+          id: string;
+          punto_interes_id: string;
+          tipo: TipoActividad;
+          notas: string | null;
+          realizado_por: string;
+          fecha: string;
+          proxima_fecha_estimada: string | null;
+          fecha_registro: string;
+        };
+        Insert: {
+          id?: string;
+          punto_interes_id: string;
+          tipo: TipoActividad;
+          notas?: string | null;
+          realizado_por?: string;
+          fecha?: string;
+          proxima_fecha_estimada?: string | null;
+          fecha_registro?: string;
+        };
+        Update: {
+          id?: string;
+          punto_interes_id?: string;
+          tipo?: TipoActividad;
+          notas?: string | null;
+          realizado_por?: string;
+          fecha?: string;
+          proxima_fecha_estimada?: string | null;
+          fecha_registro?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "actividades_realizado_por_fkey";
+            columns: ["realizado_por"];
+            referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "actividades_punto_interes_id_fkey";
+            columns: ["punto_interes_id"];
+            referencedRelation: "puntos_interes";
             referencedColumns: ["id"];
           },
         ];

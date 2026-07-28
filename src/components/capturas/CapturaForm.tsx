@@ -1,0 +1,172 @@
+"use client";
+
+import { useState } from "react";
+import type { TipoCaptura } from "@/lib/supabase/database.types";
+
+const ESPECIES_SUGERIDAS = [
+  "Jabalí",
+  "Conejo",
+  "Liebre",
+  "Perdiz",
+  "Zorro",
+  "Paloma",
+  "Corzo",
+];
+
+export interface CapturaFormValues {
+  tipo: TipoCaptura;
+  especie: string;
+  cantidad: number;
+  fecha: string;
+  notas: string | null;
+}
+
+function hoyISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+export function CapturaForm({
+  onSubmit,
+  onCancel,
+}: {
+  onSubmit: (values: CapturaFormValues) => void | Promise<void>;
+  onCancel: () => void;
+}) {
+  const [tipo, setTipo] = useState<TipoCaptura>("captura");
+  const [especie, setEspecie] = useState("");
+  const [cantidad, setCantidad] = useState(1);
+  const [fecha, setFecha] = useState(hoyISO());
+  const [notas, setNotas] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!especie.trim()) return;
+    setSaving(true);
+    try {
+      await onSubmit({
+        tipo,
+        especie: especie.trim(),
+        cantidad,
+        fecha,
+        notas: notas.trim() || null,
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
+      <div className="rounded-t-2xl bg-background p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-black/15 dark:bg-white/20" />
+        <h2 className="text-base font-semibold text-foreground">Nueva captura/avistamiento</h2>
+
+        <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setTipo("captura")}
+              className={`rounded-lg border px-3 py-3 text-sm font-medium ${
+                tipo === "captura"
+                  ? "border-emerald-700 bg-emerald-800/10 text-emerald-800 dark:text-emerald-400"
+                  : "border-black/10 text-foreground/70 dark:border-white/15"
+              }`}
+            >
+              🎯 Captura
+            </button>
+            <button
+              type="button"
+              onClick={() => setTipo("avistamiento")}
+              className={`rounded-lg border px-3 py-3 text-sm font-medium ${
+                tipo === "avistamiento"
+                  ? "border-emerald-700 bg-emerald-800/10 text-emerald-800 dark:text-emerald-400"
+                  : "border-black/10 text-foreground/70 dark:border-white/15"
+              }`}
+            >
+              👁 Avistamiento
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="especie" className="text-sm font-medium text-foreground">
+              Especie
+            </label>
+            <input
+              id="especie"
+              list="especies-sugeridas"
+              value={especie}
+              onChange={(e) => setEspecie(e.target.value)}
+              required
+              placeholder="Jabalí, conejo, perdiz…"
+              className="rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+            />
+            <datalist id="especies-sugeridas">
+              {ESPECIES_SUGERIDAS.map((e) => (
+                <option key={e} value={e} />
+              ))}
+            </datalist>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <label htmlFor="cantidad" className="text-sm font-medium text-foreground">
+                Cantidad
+              </label>
+              <input
+                id="cantidad"
+                type="number"
+                min={1}
+                value={cantidad}
+                onChange={(e) => setCantidad(Math.max(1, Number(e.target.value) || 1))}
+                className="rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="fecha" className="text-sm font-medium text-foreground">
+                Fecha
+              </label>
+              <input
+                id="fecha"
+                type="date"
+                value={fecha}
+                onChange={(e) => setFecha(e.target.value)}
+                className="rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="captura-notas" className="text-sm font-medium text-foreground">
+              Notas
+            </label>
+            <textarea
+              id="captura-notas"
+              value={notas}
+              onChange={(e) => setNotas(e.target.value)}
+              rows={3}
+              className="resize-none rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex-1 rounded-lg border border-black/10 px-4 py-3 text-sm font-medium text-foreground dark:border-white/15"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 rounded-lg bg-emerald-800 px-4 py-3 text-sm font-medium text-white disabled:opacity-60"
+            >
+              {saving ? "Guardando…" : "Guardar"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
