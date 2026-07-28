@@ -61,18 +61,18 @@ export function PuntoForm({
 
   return (
     <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-      <div className="rounded-t-2xl bg-background p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-black/15 dark:bg-white/20" />
-        <h2 className="text-base font-semibold text-foreground">{titulo}</h2>
+      <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-soft/30" />
+        <h2 className="text-base font-semibold text-ink">{titulo}</h2>
         {creadoPorNombre && fechaCreacion && (
-          <p className="mt-0.5 text-xs text-foreground/50">
+          <p className="mt-0.5 text-xs text-ink-soft">
             Añadido por {creadoPorNombre} · {formatFecha(fechaCreacion)}
           </p>
         )}
 
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label htmlFor="punto-nombre" className="text-sm font-medium text-foreground">
+            <label htmlFor="punto-nombre" className="text-sm font-medium text-ink">
               Nombre
             </label>
             <input
@@ -81,12 +81,12 @@ export function PuntoForm({
               onChange={(e) => setNombre(e.target.value)}
               disabled={!puedeEditar}
               required
-              className="rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 disabled:opacity-60 dark:border-white/15 dark:bg-white/5"
+              className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary disabled:opacity-60"
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-sm font-medium text-foreground">Tipo</span>
+            <span className="text-sm font-medium text-ink">Tipo</span>
             <div className="grid grid-cols-4 gap-2">
               {TIPOS.map((t) => (
                 <button
@@ -96,8 +96,8 @@ export function PuntoForm({
                   onClick={() => setTipo(t)}
                   className={`rounded-lg border px-2 py-2 text-xs disabled:opacity-60 ${
                     tipo === t
-                      ? "border-emerald-700 bg-emerald-800/10 text-emerald-800 dark:text-emerald-400"
-                      : "border-black/10 text-foreground/70 dark:border-white/15"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-ink-soft"
                   }`}
                 >
                   {TIPO_LABEL[t]}
@@ -107,7 +107,7 @@ export function PuntoForm({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="punto-notas" className="text-sm font-medium text-foreground">
+            <label htmlFor="punto-notas" className="text-sm font-medium text-ink">
               Notas
             </label>
             <textarea
@@ -116,7 +116,7 @@ export function PuntoForm({
               onChange={(e) => setNotas(e.target.value)}
               disabled={!puedeEditar}
               rows={3}
-              className="resize-none rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 disabled:opacity-60 dark:border-white/15 dark:bg-white/5"
+              className="resize-none rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary disabled:opacity-60"
             />
           </div>
 
@@ -124,7 +124,7 @@ export function PuntoForm({
             <button
               type="button"
               onClick={onRegistrarActividad}
-              className="rounded-lg border border-emerald-700/30 px-4 py-3 text-sm font-medium text-emerald-800 dark:text-emerald-400"
+              className="rounded-lg border border-primary/30 px-4 py-3 text-sm font-medium text-primary"
             >
               🧰 Registrar actividad aquí
             </button>
@@ -134,7 +134,7 @@ export function PuntoForm({
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 rounded-lg border border-black/10 px-4 py-3 text-sm font-medium text-foreground dark:border-white/15"
+              className="flex-1 rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
             >
               Cerrar
             </button>
@@ -142,7 +142,7 @@ export function PuntoForm({
               <button
                 type="button"
                 onClick={onDelete}
-                className="flex-1 rounded-lg border border-red-600/30 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400"
+                className="flex-1 rounded-lg border border-alert/30 px-4 py-3 text-sm font-medium text-alert"
               >
                 Borrar
               </button>
@@ -151,7 +151,7 @@ export function PuntoForm({
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 rounded-lg bg-emerald-800 px-4 py-3 text-sm font-medium text-white disabled:opacity-60"
+                className="flex-1 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-white disabled:opacity-60"
               >
                 {saving ? "Guardando…" : "Guardar"}
               </button>

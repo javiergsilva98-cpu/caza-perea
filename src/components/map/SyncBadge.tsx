@@ -33,10 +33,10 @@ export function SyncBadge() {
     <button
       type="button"
       onClick={() => void trySync()}
-      className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-black/10 bg-white/95 px-3 py-1.5 text-xs font-medium text-foreground shadow dark:border-white/15 dark:bg-black/90"
+      className="pointer-events-auto flex items-center gap-1.5 rounded-full border border-border bg-bg-card px-3 py-1.5 text-xs font-medium text-ink shadow"
     >
       <span
-        className={`h-2 w-2 rounded-full ${online ? "bg-amber-500" : "bg-red-500"}`}
+        className={`h-2 w-2 rounded-full ${online ? "bg-marker" : "bg-alert"}`}
         aria-hidden="true"
       />
       {online

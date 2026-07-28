@@ -25,22 +25,22 @@ export function CapturaDetail({
 }) {
   return (
     <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-      <div className="rounded-t-2xl bg-background p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-black/15 dark:bg-white/20" />
-        <h2 className="text-base font-semibold text-foreground">
+      <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-soft/30" />
+        <h2 className="text-base font-semibold text-ink">
           {captura.tipo === "captura" ? "🐗" : "👁"} {captura.especie}
           {captura.cantidad > 1 ? ` ×${captura.cantidad}` : ""}
         </h2>
-        <p className="mt-1 text-xs text-foreground/50">
+        <p className="mt-1 text-xs text-ink-soft">
           {formatFecha(captura.fecha)} · {registradoPorNombre}
         </p>
-        {captura.notas && <p className="mt-3 text-sm text-foreground/70">{captura.notas}</p>}
+        {captura.notas && <p className="mt-3 text-sm text-ink-soft">{captura.notas}</p>}
 
         <div className="mt-5 flex gap-2">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-lg border border-black/10 px-4 py-3 text-sm font-medium text-foreground dark:border-white/15"
+            className="flex-1 rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
           >
             Cerrar
           </button>
@@ -48,7 +48,7 @@ export function CapturaDetail({
             <button
               type="button"
               onClick={() => void onDelete()}
-              className="flex-1 rounded-lg border border-red-600/30 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400"
+              className="flex-1 rounded-lg border border-alert/30 px-4 py-3 text-sm font-medium text-alert"
             >
               Borrar
             </button>

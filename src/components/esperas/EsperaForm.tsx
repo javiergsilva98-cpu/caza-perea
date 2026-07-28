@@ -48,15 +48,15 @@ export function EsperaForm({
   if (puestos.length === 0) {
     return (
       <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-        <div className="rounded-t-2xl bg-background p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-          <p className="text-sm text-foreground/70">
+        <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+          <p className="text-sm text-ink-soft">
             Todavía no hay ningún puesto creado en el mapa. Crea uno (tipo
             &quot;Puesto&quot;) primero para poder asignarlo.
           </p>
           <button
             type="button"
             onClick={onCancel}
-            className="mt-4 w-full rounded-lg border border-black/10 px-4 py-3 text-sm font-medium text-foreground dark:border-white/15"
+            className="mt-4 w-full rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
           >
             Cerrar
           </button>
@@ -67,20 +67,20 @@ export function EsperaForm({
 
   return (
     <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-      <div className="rounded-t-2xl bg-background p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-black/15 dark:bg-white/20" />
-        <h2 className="text-base font-semibold text-foreground">Asignar puesto</h2>
+      <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-soft/30" />
+        <h2 className="text-base font-semibold text-ink">Asignar puesto</h2>
 
         <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label htmlFor="puesto" className="text-sm font-medium text-foreground">
+            <label htmlFor="puesto" className="text-sm font-medium text-ink">
               Puesto
             </label>
             <select
               id="puesto"
               value={puestoId}
               onChange={(e) => setPuestoId(e.target.value)}
-              className="rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+              className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
             >
               {puestos.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -91,14 +91,14 @@ export function EsperaForm({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="cazador" className="text-sm font-medium text-foreground">
+            <label htmlFor="cazador" className="text-sm font-medium text-ink">
               Cazador
             </label>
             <select
               id="cazador"
               value={cazadorId}
               onChange={(e) => setCazadorId(e.target.value)}
-              className="rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+              className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
             >
               {usuarios.map((u) => (
                 <option key={u.id} value={u.id}>
@@ -109,7 +109,7 @@ export function EsperaForm({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="fecha" className="text-sm font-medium text-foreground">
+            <label htmlFor="fecha" className="text-sm font-medium text-ink">
               Fecha
             </label>
             <input
@@ -117,12 +117,12 @@ export function EsperaForm({
               type="date"
               value={fecha}
               onChange={(e) => setFecha(e.target.value)}
-              className="rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+              className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="espera-notas" className="text-sm font-medium text-foreground">
+            <label htmlFor="espera-notas" className="text-sm font-medium text-ink">
               Notas
             </label>
             <textarea
@@ -130,24 +130,24 @@ export function EsperaForm({
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
               rows={2}
-              className="resize-none rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+              className="resize-none rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
             />
           </div>
 
-          {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
+          {error && <p className="text-sm text-alert">{error}</p>}
 
           <div className="flex gap-2">
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 rounded-lg border border-black/10 px-4 py-3 text-sm font-medium text-foreground dark:border-white/15"
+              className="flex-1 rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 rounded-lg bg-emerald-800 px-4 py-3 text-sm font-medium text-white disabled:opacity-60"
+              className="flex-1 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-white disabled:opacity-60"
             >
               {saving ? "Guardando…" : "Asignar"}
             </button>

@@ -72,7 +72,7 @@ export function FincaMap() {
     if (!map) return;
     boundaryLayerRef.current?.remove();
     const layer = L.geoJSON(geometria as unknown as GeoJSON.GeoJsonObject, {
-      style: { color: "#2563eb", weight: 2, opacity: 0.7, fill: false },
+      style: { color: "#D4A03C", weight: 3, opacity: 0.7, fill: false },
     });
     layer.addTo(map);
     boundaryLayerRef.current = layer;
@@ -358,26 +358,26 @@ export function FincaMap() {
       </div>
 
       {boundaryState === "dibujando" && (
-        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-black/70 px-3 py-2 text-center text-xs text-white">
+        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-ink/80 px-3 py-2 text-center text-xs text-white">
           Toca cada esquina de la linde. Para terminar, toca dos veces seguidas
           o vuelve a tocar el primer punto.
         </div>
       )}
 
       {boundaryState === "editando" && (
-        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-black/70 px-3 py-2 text-center text-xs text-white">
+        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-ink/80 px-3 py-2 text-center text-xs text-white">
           Arrastra un punto para moverlo, o tócalo para borrarlo.
         </div>
       )}
 
       {modoColocar === "punto" && (
-        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-black/70 px-3 py-2 text-center text-xs text-white">
+        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-ink/80 px-3 py-2 text-center text-xs text-white">
           Toca el mapa donde quieras añadir el punto.
         </div>
       )}
 
       {modoColocar === "captura" && (
-        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-black/70 px-3 py-2 text-center text-xs text-white">
+        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-ink/80 px-3 py-2 text-center text-xs text-white">
           Toca el mapa donde ha pasado.
         </div>
       )}
@@ -404,8 +404,8 @@ export function FincaMap() {
               }
               className={`flex h-12 w-12 items-center justify-center rounded-full text-xl shadow ${
                 boundaryState !== "idle"
-                  ? "bg-amber-600 text-white"
-                  : "border border-black/10 bg-white/95 text-foreground dark:border-white/15 dark:bg-black/90"
+                  ? "bg-alert text-white"
+                  : "border border-border bg-bg-card text-ink"
               }`}
             >
               {boundaryState === "idle" && "✏️"}
@@ -419,8 +419,8 @@ export function FincaMap() {
               title="Añadir captura"
               className={`flex h-12 w-12 items-center justify-center rounded-full text-xl shadow ${
                 modoColocar === "captura"
-                  ? "bg-emerald-800 text-white"
-                  : "border border-black/10 bg-white/95 text-foreground dark:border-white/15 dark:bg-black/90"
+                  ? "bg-secondary text-white"
+                  : "border border-border bg-bg-card text-ink"
               }`}
             >
               🐗
@@ -432,8 +432,8 @@ export function FincaMap() {
               title="Añadir punto"
               className={`flex h-12 w-12 items-center justify-center rounded-full text-xl shadow ${
                 modoColocar === "punto"
-                  ? "bg-emerald-800 text-white"
-                  : "border border-black/10 bg-white/95 text-foreground dark:border-white/15 dark:bg-black/90"
+                  ? "bg-primary text-white"
+                  : "border border-border bg-bg-card text-ink"
               }`}
             >
               📍
@@ -444,7 +444,7 @@ export function FincaMap() {
           type="button"
           onClick={() => setMenuAbierto((v) => !v)}
           aria-label={menuAbierto ? "Cerrar menú del mapa" : "Abrir menú del mapa"}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-800 text-2xl leading-none text-white shadow-lg"
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-2xl leading-none text-white shadow-lg"
         >
           {menuAbierto ? "×" : "+"}
         </button>

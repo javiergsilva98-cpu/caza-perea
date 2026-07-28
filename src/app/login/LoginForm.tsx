@@ -16,7 +16,7 @@ export function LoginForm() {
       <input type="hidden" name="next" value={next} />
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="email" className="text-sm font-medium text-foreground">
+        <label htmlFor="email" className="text-sm font-medium text-ink">
           Email
         </label>
         <input
@@ -25,12 +25,12 @@ export function LoginForm() {
           type="email"
           autoComplete="email"
           required
-          className="rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+          className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
         />
       </div>
 
       <div className="flex flex-col gap-1">
-        <label htmlFor="password" className="text-sm font-medium text-foreground">
+        <label htmlFor="password" className="text-sm font-medium text-ink">
           Contraseña
         </label>
         <input
@@ -39,18 +39,18 @@ export function LoginForm() {
           type="password"
           autoComplete="current-password"
           required
-          className="rounded-lg border border-black/10 bg-white px-4 py-3 text-base text-foreground outline-none focus:border-emerald-700 dark:border-white/15 dark:bg-white/5"
+          className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
         />
       </div>
 
       {state.error && (
-        <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>
+        <p className="text-sm text-alert">{state.error}</p>
       )}
 
       <button
         type="submit"
         disabled={pending}
-        className="mt-2 rounded-lg bg-emerald-800 px-4 py-3 text-base font-medium text-white transition-colors disabled:opacity-60"
+        className="mt-2 rounded-lg bg-primary px-4 py-3 text-base font-medium text-white transition-colors disabled:opacity-60"
       >
         {pending ? "Entrando…" : "Entrar"}
       </button>

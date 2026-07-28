@@ -9,7 +9,7 @@ const FincaMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex flex-1 items-center justify-center text-sm text-foreground/50">
+      <div className="flex flex-1 items-center justify-center text-sm text-ink-soft">
         Cargando mapa…
       </div>
     ),
