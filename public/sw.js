@@ -1,4 +1,4 @@
-const CACHE_VERSION = "casa-perea-v2";
+const CACHE_VERSION = "casa-perea-v3";
 const TILE_CACHE = "casa-perea-tiles-v1";
 const CURRENT_CACHES = [CACHE_VERSION, TILE_CACHE];
 

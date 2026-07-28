@@ -24,3 +24,12 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Crédito de Esri más discreto: obligatorio por sus condiciones de uso
+   gratuito, pero no hace falta que ocupe una franja entera. */
+.leaflet-control-attribution {
+  font-size: 9px;
+  padding: 0 4px;
+  background: rgba(255, 255, 255, 0.6);
+  line-height: 1.3;
+}
