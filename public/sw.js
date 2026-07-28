@@ -1,4 +1,7 @@
-const CACHE_VERSION = "casa-perea-v1";
+const CACHE_VERSION = "casa-perea-v2";
+const TILE_CACHE = "casa-perea-tiles-v1";
+const CURRENT_CACHES = [CACHE_VERSION, TILE_CACHE];
+
 const OFFLINE_URL = "/offline";
 const APP_SHELL = [
   "/",
@@ -24,7 +27,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== CACHE_VERSION)
+            .filter((key) => !CURRENT_CACHES.includes(key))
             .map((key) => caches.delete(key))
         )
       )
@@ -33,10 +36,17 @@ self.addEventListener("activate", (event) => {
 });
 
 // Nunca interceptar peticiones a Supabase (auth/API): deben ir siempre a
-// red y ser gestionadas por la app (con su propia lógica offline-first
-// en sprints futuros), no cacheadas por el service worker.
+// red y ser gestionadas por la app (que tiene su propia cola offline en
+// IndexedDB), no cacheadas por el service worker.
 function isSupabaseRequest(url) {
   return /supabase\.co$/.test(url.hostname) || /supabase\.in$/.test(url.hostname);
+}
+
+// Teselas del mapa satélite (Esri World Imagery): cada URL identifica una
+// tesela concreta (z/y/x) cuyo contenido no cambia, así que cachearlas
+// agresivamente permite ver el mapa de zonas ya visitadas sin cobertura.
+function isMapTileRequest(url) {
+  return /\.arcgisonline\.com$/.test(url.hostname);
 }
 
 self.addEventListener("fetch", (event) => {
@@ -44,7 +54,26 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin && !isSupabaseRequest(url)) return;
+
+  if (isMapTileRequest(url)) {
+    event.respondWith(
+      caches.open(TILE_CACHE).then(async (cache) => {
+        const cached = await cache.match(request);
+        if (cached) return cached;
+        const response = await fetch(request);
+        // Las teselas cruzan de origen sin CORS, así que llegan como
+        // respuestas "opacas" (response.ok siempre false ahí) — se cachean
+        // igual, es el comportamiento esperado para peticiones de imagen.
+        if (response.ok || response.type === "opaque") {
+          cache.put(request, response.clone());
+        }
+        return response;
+      })
+    );
+    return;
+  }
+
+  if (url.origin !== self.location.origin) return; // incluye Supabase y otros orígenes
   if (isSupabaseRequest(url)) return;
 
   // Navegaciones: red primero, con fallback a caché y luego a /offline.
