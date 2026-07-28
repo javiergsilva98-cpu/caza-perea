@@ -79,8 +79,9 @@ export default function CapturasPage() {
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <span className="text-sm font-medium text-foreground">
-                    {c.tipo === "captura" ? "🎯" : "👁"} {c.especie}
+                    {c.tipo === "captura" ? "🐗" : "👁"} {c.especie}
                     {c.cantidad > 1 ? ` ×${c.cantidad}` : ""}
+                    {c.lat !== null && c.lng !== null && " 📍"}
                   </span>
                   <p className="mt-0.5 text-xs text-foreground/50">
                     {formatFecha(c.fecha)} · {nombres[c.registrado_por] ?? "—"}
