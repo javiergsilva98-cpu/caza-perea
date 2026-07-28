@@ -12,10 +12,23 @@
 create extension if not exists pgcrypto;
 
 -- ---------------------------------------------------------------------
+-- usuarios
+-- ---------------------------------------------------------------------
+create table public.usuarios (
+  id uuid primary key references auth.users (id) on delete cascade,
+  nombre text not null,
+  rol text not null default 'cazador' check (rol in ('admin', 'cazador')),
+  fecha_alta timestamptz not null default now()
+);
+
+comment on table public.usuarios is 'Perfil y rol de cada usuario de la app, uno a uno con auth.users.';
+
 -- Helper: ¿el usuario autenticado actual es admin?
 -- security definer para poder usarse dentro de las policies de RLS sin
--- recursión infinita al consultar la propia tabla usuarios.
--- ---------------------------------------------------------------------
+-- recursión infinita al consultar la propia tabla usuarios. Definida
+-- después de crear `usuarios` porque las funciones `language sql` se
+-- validan contra el catálogo en el momento de crearse (a diferencia de
+-- las `plpgsql`, que se resuelven en tiempo de ejecución).
 create or replace function public.is_admin()
 returns boolean
 language sql
@@ -27,18 +40,6 @@ as $$
     select 1 from public.usuarios where id = auth.uid() and rol = 'admin'
   );
 $$;
-
--- ---------------------------------------------------------------------
--- usuarios
--- ---------------------------------------------------------------------
-create table public.usuarios (
-  id uuid primary key references auth.users (id) on delete cascade,
-  nombre text not null,
-  rol text not null default 'cazador' check (rol in ('admin', 'cazador')),
-  fecha_alta timestamptz not null default now()
-);
-
-comment on table public.usuarios is 'Perfil y rol de cada usuario de la app, uno a uno con auth.users.';
 
 alter table public.usuarios enable row level security;
 
