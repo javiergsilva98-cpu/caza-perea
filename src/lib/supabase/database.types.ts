@@ -328,6 +328,52 @@ export interface Database {
           },
         ];
       };
+      gastos: {
+        Row: {
+          id: string;
+          concepto: string;
+          importe: number;
+          pagado_por: string;
+          fecha: string;
+          notas: string | null;
+          registrado_por: string;
+          fecha_registro: string;
+        };
+        Insert: {
+          id?: string;
+          concepto: string;
+          importe: number;
+          pagado_por: string;
+          fecha: string;
+          notas?: string | null;
+          registrado_por?: string;
+          fecha_registro?: string;
+        };
+        Update: {
+          id?: string;
+          concepto?: string;
+          importe?: number;
+          pagado_por?: string;
+          fecha?: string;
+          notas?: string | null;
+          registrado_por?: string;
+          fecha_registro?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "gastos_pagado_por_fkey";
+            columns: ["pagado_por"];
+            referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "gastos_registrado_por_fkey";
+            columns: ["registrado_por"];
+            referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       finca_limite_actual: {

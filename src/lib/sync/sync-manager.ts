@@ -37,6 +37,7 @@ const TABLE_BY_ENTITY = {
   actividad: "actividades",
   espera: "esperas",
   calendario_asistencia: "calendario_asistencias",
+  gasto: "gastos",
 } as const;
 
 // finca_limite es de solo-inserción: cada edición crea una versión nueva
