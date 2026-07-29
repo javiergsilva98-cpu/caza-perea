@@ -8,6 +8,7 @@ import { startSyncTriggers } from "@/lib/sync/sync-manager";
 import { createClient } from "@/lib/supabase/client";
 import type { EsperaRow, PuntoInteresRow } from "@/lib/offline/db";
 import { EsperaForm, type EsperaFormValues } from "@/components/esperas/EsperaForm";
+import { SorteoModal } from "@/components/esperas/SorteoModal";
 import { SyncBadge } from "@/components/map/SyncBadge";
 
 function hoyISO() {
@@ -28,6 +29,7 @@ export default function EsperasPage() {
   const [usuarios, setUsuarios] = useState<UsuarioBasico[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showSorteo, setShowSorteo] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -102,6 +104,18 @@ export default function EsperasPage() {
   async function handleDelete(id: string) {
     await borrarEspera(id);
     setEsperas((prev) => prev.filter((e) => e.id !== id));
+  }
+
+  async function handleGuardarSorteo(
+    asignaciones: { puesto_id: string; cazador_id: string; fecha: string }[]
+  ) {
+    const nuevas: EsperaRow[] = [];
+    for (const a of asignaciones) {
+      const row = await crearEspera({ ...a, notas: null });
+      nuevas.push(row);
+    }
+    setEsperas((prev) => [...nuevas, ...prev]);
+    setShowSorteo(false);
   }
 
   return (
@@ -179,7 +193,16 @@ export default function EsperasPage() {
         )}
       </div>
 
-      <div className="absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-20">
+      <div className="absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-20 flex flex-col items-end gap-2">
+        <button
+          type="button"
+          onClick={() => setShowSorteo(true)}
+          aria-label="Sortear puestos"
+          title="Sortear puestos"
+          className="flex h-12 w-12 items-center justify-center rounded-full border border-border bg-bg-card text-xl text-ink shadow"
+        >
+          🎲
+        </button>
         <button
           type="button"
           onClick={() => {
@@ -201,6 +224,16 @@ export default function EsperasPage() {
           onSubmit={handleSubmit}
           onCancel={() => setShowForm(false)}
           error={formError}
+        />
+      )}
+
+      {showSorteo && (
+        <SorteoModal
+          puestos={puestosDisponibles}
+          usuarios={usuarios}
+          esperasExistentes={esperas}
+          onGuardar={handleGuardarSorteo}
+          onCancel={() => setShowSorteo(false)}
         />
       )}
     </div>
