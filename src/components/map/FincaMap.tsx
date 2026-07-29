@@ -24,6 +24,7 @@ import type { Json } from "@/lib/supabase/database.types";
 import { iconoCaptura, iconoPunto } from "./icons";
 import { PuntoForm, type PuntoFormValues } from "./PuntoForm";
 import { SyncBadge } from "./SyncBadge";
+import { TiempoWidget } from "./TiempoWidget";
 import { CapturaForm, type CapturaFormValues } from "@/components/capturas/CapturaForm";
 import { CapturaDetail } from "@/components/capturas/CapturaDetail";
 import { ActividadForm, type ActividadFormValues } from "@/components/actividades/ActividadForm";
@@ -496,6 +497,8 @@ export function FincaMap() {
       <div className="pointer-events-none absolute inset-x-0 top-3 z-20 flex justify-center px-3">
         <SyncBadge />
       </div>
+
+      <TiempoWidget />
 
       {boundaryState === "dibujando" && (
         <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-ink/80 px-3 py-2 text-center text-xs text-white">
