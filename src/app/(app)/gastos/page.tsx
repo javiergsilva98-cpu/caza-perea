@@ -9,6 +9,7 @@ import type { GastoRow } from "@/lib/offline/db";
 import { GastoForm, type GastoFormValues } from "@/components/gastos/GastoForm";
 import { SyncBadge } from "@/components/map/SyncBadge";
 import { formatFecha } from "@/lib/format";
+import { usePaginado } from "@/lib/hooks/usePaginado";
 
 const formatoEuro = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
 
@@ -81,6 +82,10 @@ export default function GastosPage() {
     setGastos((prev) => prev.filter((g) => g.id !== id));
   }
 
+  // Los totales de arriba siempre se calculan sobre "gastos" completo — solo
+  // la lista de abajo se pagina para no pintar de golpe todo el histórico.
+  const { visibles: gastosVisibles, hayMas, mostrarMas } = usePaginado(gastos);
+
   return (
     <div className="relative flex flex-1 flex-col">
       <div className="pointer-events-none sticky top-0 z-20 flex justify-center px-3 pt-3">
@@ -132,7 +137,7 @@ export default function GastosPage() {
         )}
 
         <ul className="mt-4 flex flex-col gap-2">
-          {gastos.map((g) => (
+          {gastosVisibles.map((g) => (
             <li key={g.id} className="rounded-xl border border-border bg-bg-card p-3">
               <div className="flex items-start justify-between gap-2">
                 <div>
@@ -158,6 +163,16 @@ export default function GastosPage() {
             </li>
           ))}
         </ul>
+
+        {hayMas && (
+          <button
+            type="button"
+            onClick={mostrarMas}
+            className="mt-3 w-full rounded-lg border border-border py-2.5 text-sm font-medium text-ink-soft"
+          >
+            Mostrar más
+          </button>
+        )}
       </div>
 
       <div className="absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-20">

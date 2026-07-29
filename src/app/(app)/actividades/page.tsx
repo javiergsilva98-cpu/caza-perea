@@ -16,6 +16,7 @@ import { PuntoForm, type PuntoFormValues } from "@/components/map/PuntoForm";
 import { TIPO_ACTIVIDAD_LABEL } from "@/components/map/icons";
 import type { Coords } from "@/lib/geo/google-maps";
 import { formatFecha } from "@/lib/format";
+import { usePaginado } from "@/lib/hooks/usePaginado";
 
 function diasDesde(fechaISO: string): number {
   const ms = Date.now() - new Date(fechaISO + "T00:00:00").getTime();
@@ -83,6 +84,10 @@ export default function ActividadesPage() {
     setNuevoPuntoEn(null);
   }
 
+  // El resumen de "comederos y bebederos" de arriba siempre mira el
+  // histórico completo — solo la lista de abajo se pagina.
+  const { visibles: actividadesVisibles, hayMas, mostrarMas } = usePaginado(actividades);
+
   return (
     <div className="relative flex flex-1 flex-col">
       <div className="pointer-events-none sticky top-0 z-20 flex justify-center px-3 pt-3">
@@ -133,7 +138,7 @@ export default function ActividadesPage() {
         )}
 
         <ul className="mt-2 flex flex-col gap-2">
-          {actividades.map((a) => {
+          {actividadesVisibles.map((a) => {
             const punto = puntos.find((p) => p.id === a.punto_interes_id);
             return (
               <li
@@ -152,6 +157,16 @@ export default function ActividadesPage() {
             );
           })}
         </ul>
+
+        {hayMas && (
+          <button
+            type="button"
+            onClick={mostrarMas}
+            className="mt-3 w-full rounded-lg border border-border py-2.5 text-sm font-medium text-ink-soft"
+          >
+            Mostrar más
+          </button>
+        )}
       </div>
 
       <div className="absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-20 flex flex-col items-end gap-2">

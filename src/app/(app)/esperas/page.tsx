@@ -11,6 +11,7 @@ import { EsperaForm, type EsperaFormValues } from "@/components/esperas/EsperaFo
 import { SorteoModal } from "@/components/esperas/SorteoModal";
 import { SyncBadge } from "@/components/map/SyncBadge";
 import { formatFecha as formatFechaBase, hoyISO } from "@/lib/format";
+import { usePaginado } from "@/lib/hooks/usePaginado";
 
 function formatFecha(iso: string) {
   return formatFechaBase(iso, { weekday: true });
@@ -99,6 +100,9 @@ export default function EsperasPage() {
     setEsperas((prev) => prev.filter((e) => e.id !== id));
   }
 
+  const { visibles: historialVisible, hayMas: hayMasHistorial, mostrarMas: mostrarMasHistorial } =
+    usePaginado(historial);
+
   async function handleGuardarSorteo(
     asignaciones: { puesto_id: string; cazador_id: string; fecha: string }[]
   ) {
@@ -172,7 +176,7 @@ export default function EsperasPage() {
               Historial
             </h2>
             <ul className="mt-2 flex flex-col gap-2">
-              {historial.map((e) => (
+              {historialVisible.map((e) => (
                 <li
                   key={e.id}
                   className="rounded-xl border border-border bg-bg-card/60 p-3 text-sm text-ink-soft"
@@ -182,6 +186,15 @@ export default function EsperasPage() {
                 </li>
               ))}
             </ul>
+            {hayMasHistorial && (
+              <button
+                type="button"
+                onClick={mostrarMasHistorial}
+                className="mt-3 w-full rounded-lg border border-border py-2.5 text-sm font-medium text-ink-soft"
+              >
+                Mostrar más
+              </button>
+            )}
           </>
         )}
       </div>
