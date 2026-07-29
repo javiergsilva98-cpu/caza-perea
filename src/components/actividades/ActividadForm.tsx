@@ -5,6 +5,7 @@ import type { PuntoInteresRow } from "@/lib/offline/db";
 import type { TipoActividad } from "@/lib/supabase/database.types";
 import { TIPO_EMOJI, TIPO_ACTIVIDAD_LABEL } from "@/components/map/icons";
 import { hoyISO } from "@/lib/format";
+import { BottomSheet } from "@/components/BottomSheet";
 
 const TIPOS = Object.entries(TIPO_ACTIVIDAD_LABEL) as [TipoActividad, string][];
 
@@ -57,31 +58,27 @@ export function ActividadForm({
 
   if (puntos.length === 0) {
     return (
-      <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-        <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-          <p className="text-sm text-ink-soft">
-            Todavía no hay ningún punto de interés creado en el mapa. Crea un
-            comedero o bebedero primero para poder registrar actividad sobre él.
-          </p>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="mt-4 w-full rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
-          >
-            Cerrar
-          </button>
-        </div>
-      </div>
+      <BottomSheet showHandle={false}>
+        <p className="text-sm text-ink-soft">
+          Todavía no hay ningún punto de interés creado en el mapa. Crea un
+          comedero o bebedero primero para poder registrar actividad sobre él.
+        </p>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="mt-4 w-full rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
+        >
+          Cerrar
+        </button>
+      </BottomSheet>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-      <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-soft/30" />
-        <h2 className="text-base font-semibold text-ink">Nueva actividad</h2>
+    <BottomSheet>
+      <h2 className="text-base font-semibold text-ink">Nueva actividad</h2>
 
-        <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <span className="text-sm font-medium text-ink">Punto de interés</span>
             <div className="flex max-h-48 flex-col gap-1 overflow-y-auto rounded-lg border border-border p-1">
@@ -180,7 +177,6 @@ export function ActividadForm({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </BottomSheet>
   );
 }

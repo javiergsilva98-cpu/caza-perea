@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { PuntoInteresRow } from "@/lib/offline/db";
 import type { UsuarioBasico } from "@/lib/data/usuarios";
 import { hoyISO } from "@/lib/format";
+import { BottomSheet } from "@/components/BottomSheet";
 
 export interface EsperaFormValues {
   puesto_id: string;
@@ -44,31 +45,27 @@ export function EsperaForm({
 
   if (puestos.length === 0) {
     return (
-      <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-        <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-          <p className="text-sm text-ink-soft">
-            Todavía no hay ningún puesto creado en el mapa. Crea uno (tipo
-            &quot;Puesto&quot;) primero para poder asignarlo.
-          </p>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="mt-4 w-full rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
-          >
-            Cerrar
-          </button>
-        </div>
-      </div>
+      <BottomSheet showHandle={false}>
+        <p className="text-sm text-ink-soft">
+          Todavía no hay ningún puesto creado en el mapa. Crea uno (tipo
+          &quot;Puesto&quot;) primero para poder asignarlo.
+        </p>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="mt-4 w-full rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
+        >
+          Cerrar
+        </button>
+      </BottomSheet>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-      <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-soft/30" />
-        <h2 className="text-base font-semibold text-ink">Asignar puesto</h2>
+    <BottomSheet>
+      <h2 className="text-base font-semibold text-ink">Asignar puesto</h2>
 
-        <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <label htmlFor="puesto" className="text-sm font-medium text-ink">
               Puesto
@@ -150,7 +147,6 @@ export function EsperaForm({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </BottomSheet>
   );
 }

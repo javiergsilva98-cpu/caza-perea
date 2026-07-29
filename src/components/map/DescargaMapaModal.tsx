@@ -1,6 +1,7 @@
 "use client";
 
 import type { ProgresoDescarga } from "@/lib/offline/tile-cache";
+import { BottomSheet } from "@/components/BottomSheet";
 
 const KB_POR_TESELA = 20;
 
@@ -24,10 +25,8 @@ export function DescargaMapaModal({
   onCerrar: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-      <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-soft/30" />
-        <h2 className="text-base font-semibold text-ink">Descargar zona sin conexión</h2>
+    <BottomSheet>
+      <h2 className="text-base font-semibold text-ink">Descargar zona sin conexión</h2>
 
         {estado === "confirmar" && (
           <>
@@ -111,7 +110,6 @@ export function DescargaMapaModal({
             </button>
           </>
         )}
-      </div>
-    </div>
+    </BottomSheet>
   );
 }

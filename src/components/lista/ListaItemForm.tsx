@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { UsuarioBasico } from "@/lib/data/usuarios";
+import { BottomSheet } from "@/components/BottomSheet";
 
 export interface ListaItemFormValues {
   texto: string;
@@ -45,12 +46,10 @@ export function ListaItemForm({
   }
 
   return (
-    <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-      <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-soft/30" />
-        <h2 className="text-base font-semibold text-ink">{titulo}</h2>
+    <BottomSheet>
+      <h2 className="text-base font-semibold text-ink">{titulo}</h2>
 
-        <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <label htmlFor="item-texto" className="text-sm font-medium text-ink">
               Qué hay que llevar
@@ -117,7 +116,6 @@ export function ListaItemForm({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </BottomSheet>
   );
 }
