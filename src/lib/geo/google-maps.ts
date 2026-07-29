@@ -36,6 +36,13 @@ const ALLOWED_HOSTS = new Set([
   "google.com",
 ]);
 
+// Dominios por los que Google puede hacer pasar la redirección de un enlace
+// acortado antes de llegar al mapa final — p. ej. la pantalla de
+// consentimiento de cookies para peticiones sin sesión, habitual en la UE.
+// Se comprueba en cada salto para no seguir una redirección hacia un
+// destino arbitrario si el enlace corto estuviera manipulado.
+const ALLOWED_REDIRECT_HOSTS = new Set([...ALLOWED_HOSTS, "consent.google.com"]);
+
 export function esUrlGoogleMapsPermitida(raw: string): URL | null {
   let parsed: URL;
   try {
@@ -45,6 +52,18 @@ export function esUrlGoogleMapsPermitida(raw: string): URL | null {
   }
   if (parsed.protocol !== "https:") return null;
   if (!ALLOWED_HOSTS.has(parsed.hostname)) return null;
+  return parsed;
+}
+
+export function esRedirectGoogleMapsPermitida(raw: string): URL | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (parsed.protocol !== "https:") return null;
+  if (!ALLOWED_REDIRECT_HOSTS.has(parsed.hostname)) return null;
   return parsed;
 }
 
