@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { pareceUrl, parseDMS, parseDecimal, type Coords } from "@/lib/geo/google-maps";
+import { BottomSheet } from "@/components/BottomSheet";
 
 async function resolverUbicacion(texto: string): Promise<Coords> {
   const limpio = texto.trim();
@@ -53,16 +54,14 @@ export function PegarUbicacionForm({
   }
 
   return (
-    <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-      <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-soft/30" />
-        <h2 className="text-base font-semibold text-ink">Pegar ubicación</h2>
-        <p className="mt-1 text-xs text-ink-soft">
-          Un enlace de Google Maps (largo o corto tipo maps.app.goo.gl) o unas
-          coordenadas, en cualquier formato.
-        </p>
+    <BottomSheet>
+      <h2 className="text-base font-semibold text-ink">Pegar ubicación</h2>
+      <p className="mt-1 text-xs text-ink-soft">
+        Un enlace de Google Maps (largo o corto tipo maps.app.goo.gl) o unas
+        coordenadas, en cualquier formato.
+      </p>
 
-        <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
           <textarea
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
@@ -91,7 +90,6 @@ export function PegarUbicacionForm({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </BottomSheet>
   );
 }

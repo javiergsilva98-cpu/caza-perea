@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { EsperaRow, PuntoInteresRow } from "@/lib/offline/db";
 import type { UsuarioBasico } from "@/lib/data/usuarios";
 import { hoyISO } from "@/lib/format";
+import { BottomSheet } from "@/components/BottomSheet";
 
 function barajar<T>(arr: T[]): T[] {
   const copia = [...arr];
@@ -93,28 +94,24 @@ export function SorteoModal({
 
   if (puestos.length === 0) {
     return (
-      <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-        <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-          <p className="text-sm text-ink-soft">
-            Todavía no hay ningún puesto creado en el mapa para poder sortear.
-          </p>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="mt-4 w-full rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
-          >
-            Cerrar
-          </button>
-        </div>
-      </div>
+      <BottomSheet showHandle={false}>
+        <p className="text-sm text-ink-soft">
+          Todavía no hay ningún puesto creado en el mapa para poder sortear.
+        </p>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="mt-4 w-full rounded-lg border border-border px-4 py-3 text-sm font-medium text-ink"
+        >
+          Cerrar
+        </button>
+      </BottomSheet>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-      <div className="max-h-[85vh] overflow-y-auto rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-soft/30" />
-        <h2 className="text-base font-semibold text-ink">🎲 Sortear puestos</h2>
+    <BottomSheet scrollable>
+      <h2 className="text-base font-semibold text-ink">🎲 Sortear puestos</h2>
 
         {!resultado ? (
           <div className="mt-4 flex flex-col gap-4">
@@ -237,7 +234,6 @@ export function SorteoModal({
             </div>
           </div>
         )}
-      </div>
-    </div>
+    </BottomSheet>
   );
 }

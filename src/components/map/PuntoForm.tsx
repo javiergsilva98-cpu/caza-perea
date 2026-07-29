@@ -6,6 +6,7 @@ import { TIPO_LABEL } from "./icons";
 import { FotoPicker } from "@/components/FotoPicker";
 import { subirFoto } from "@/lib/data/fotos";
 import { formatTimestamp } from "@/lib/format";
+import { BottomSheet } from "@/components/BottomSheet";
 
 const TIPOS: TipoPuntoInteres[] = ["comedero", "bebedero", "puesto", "casa", "otro"];
 
@@ -71,17 +72,15 @@ export function PuntoForm({
   }
 
   return (
-    <div className="fixed inset-0 z-30 flex flex-col justify-end bg-black/40">
-      <div className="rounded-t-2xl bg-bg-card p-4 pb-[calc(env(safe-area-inset-bottom)+1rem)]">
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink-soft/30" />
-        <h2 className="text-base font-semibold text-ink">{titulo}</h2>
-        {creadoPorNombre && fechaCreacion && (
-          <p className="mt-0.5 text-xs text-ink-soft">
-            Añadido por {creadoPorNombre} · {formatTimestamp(fechaCreacion)}
-          </p>
-        )}
+    <BottomSheet>
+      <h2 className="text-base font-semibold text-ink">{titulo}</h2>
+      {creadoPorNombre && fechaCreacion && (
+        <p className="mt-0.5 text-xs text-ink-soft">
+          Añadido por {creadoPorNombre} · {formatTimestamp(fechaCreacion)}
+        </p>
+      )}
 
-        <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <label htmlFor="punto-nombre" className="text-sm font-medium text-ink">
               Nombre
@@ -175,7 +174,6 @@ export function PuntoForm({
             )}
           </div>
         </form>
-      </div>
-    </div>
+    </BottomSheet>
   );
 }
