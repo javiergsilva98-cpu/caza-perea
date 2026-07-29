@@ -29,12 +29,8 @@ import { CapturaForm, type CapturaFormValues } from "@/components/capturas/Captu
 import { CapturaDetail } from "@/components/capturas/CapturaDetail";
 import { ActividadForm, type ActividadFormValues } from "@/components/actividades/ActividadForm";
 import { DescargaMapaModal } from "./DescargaMapaModal";
-import {
-  tilesParaArea,
-  descargarTeselas,
-  type ProgresoDescarga,
-  type TileCoord,
-} from "@/lib/offline/tile-cache";
+import { useGpsLocation } from "@/lib/hooks/useGpsLocation";
+import { useOfflineDownload } from "@/lib/hooks/useOfflineDownload";
 
 interface PuntoFormState {
   modo: "crear" | "editar";
@@ -60,9 +56,6 @@ export function FincaMap() {
   const capturasRef = useRef<globalThis.Map<string, CapturaRow>>(new globalThis.Map());
   const boundaryLayerRef = useRef<L.GeoJSON | null>(null);
   const modoRef = useRef<ModoColocar>(null);
-  const ubicacionMarkerRef = useRef<L.CircleMarker | null>(null);
-  const ubicacionCirculoRef = useRef<L.Circle | null>(null);
-  const descargaAbortRef = useRef<AbortController | null>(null);
 
   const [modoColocar, setModoColocar] = useState<ModoColocar>(null);
   const [boundaryState, setBoundaryState] = useState<"idle" | "dibujando" | "editando">("idle");
@@ -75,13 +68,13 @@ export function FincaMap() {
   const [nombres, setNombres] = useState<Record<string, string>>({});
   const [userId, setUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [siguiendoUbicacion, setSiguiendoUbicacion] = useState(false);
-  const [ubicacionError, setUbicacionError] = useState<string | null>(null);
-  const [descargaEstado, setDescargaEstado] = useState<
-    "confirmar" | "descargando" | "completa" | "demasiado_grande" | null
-  >(null);
-  const [descargaTiles, setDescargaTiles] = useState<TileCoord[]>([]);
-  const [descargaProgreso, setDescargaProgreso] = useState<ProgresoDescarga | null>(null);
+  // Además de mapRef (usado en todo el resto del componente), se guarda la
+  // instancia también en estado: los hooks de GPS y descarga offline
+  // necesitan un valor reactivo para saber en qué momento el mapa ya existe
+  // (una ref no dispara sus efectos).
+  const [map, setMap] = useState<L.Map | null>(null);
+  const gps = useGpsLocation(map);
+  const descarga = useOfflineDownload(map, ESRI_IMAGERY_URL);
 
   useEffect(() => {
     modoRef.current = modoColocar;
@@ -229,46 +222,14 @@ export function FincaMap() {
       void guardarFincaLimite(geojson as unknown as Json);
     });
 
-    map.on("locationfound", (e: L.LocationEvent) => {
-      setUbicacionError(null);
-      if (ubicacionMarkerRef.current) {
-        ubicacionMarkerRef.current.setLatLng(e.latlng);
-      } else {
-        ubicacionMarkerRef.current = L.circleMarker(e.latlng, {
-          radius: 8,
-          color: "#fff",
-          weight: 2,
-          fillColor: "#2b7de9",
-          fillOpacity: 1,
-        }).addTo(map);
-      }
-      if (ubicacionCirculoRef.current) {
-        ubicacionCirculoRef.current.setLatLng(e.latlng).setRadius(e.accuracy);
-      } else {
-        ubicacionCirculoRef.current = L.circle(e.latlng, {
-          radius: e.accuracy,
-          color: "#2b7de9",
-          weight: 1,
-          fillOpacity: 0.1,
-        }).addTo(map);
-      }
-    });
-
-    map.on("locationerror", (e: L.ErrorEvent) => {
-      setSiguiendoUbicacion(false);
-      setUbicacionError(
-        e.code === 1
-          ? "Permiso de ubicación denegado. Actívalo en los ajustes del navegador."
-          : "No se ha podido obtener tu ubicación."
-      );
-    });
-
     mapRef.current = map;
+    setMap(map);
     startSyncTriggers();
 
     return () => {
       map.remove();
       mapRef.current = null;
+      setMap(null);
     };
   }, []);
 
@@ -326,65 +287,9 @@ export function FincaMap() {
     setBoundaryState("idle");
   }
 
-  function toggleUbicacion() {
-    const map = mapRef.current;
-    if (!map) return;
-    if (siguiendoUbicacion) {
-      map.stopLocate();
-      ubicacionMarkerRef.current?.remove();
-      ubicacionMarkerRef.current = null;
-      ubicacionCirculoRef.current?.remove();
-      ubicacionCirculoRef.current = null;
-      setSiguiendoUbicacion(false);
-    } else {
-      setUbicacionError(null);
-      map.locate({ setView: true, maxZoom: 17, watch: true, enableHighAccuracy: true });
-      setSiguiendoUbicacion(true);
-    }
-  }
-
   function handleAbrirDescarga() {
-    const map = mapRef.current;
-    if (!map) return;
-    const bounds = map.getBounds();
-    const zoomActual = Math.round(map.getZoom());
-    const zMin = Math.max(zoomActual - 1, 10);
-    const zMax = Math.min(zoomActual + 2, 18);
-    const tiles = tilesParaArea(
-      {
-        north: bounds.getNorth(),
-        south: bounds.getSouth(),
-        east: bounds.getEast(),
-        west: bounds.getWest(),
-      },
-      zMin,
-      zMax
-    );
-    setDescargaTiles(tiles);
-    setDescargaProgreso(null);
-    setDescargaEstado(tiles.length > 4000 ? "demasiado_grande" : "confirmar");
+    descarga.abrir();
     setMenuAbierto(false);
-  }
-
-  async function handleConfirmarDescarga() {
-    setDescargaEstado("descargando");
-    const controller = new AbortController();
-    descargaAbortRef.current = controller;
-    const resultado = await descargarTeselas(
-      ESRI_IMAGERY_URL,
-      descargaTiles,
-      (p) => setDescargaProgreso(p),
-      controller.signal
-    );
-    if (!controller.signal.aborted) {
-      setDescargaProgreso(resultado);
-      setDescargaEstado("completa");
-    }
-  }
-
-  function handleCancelarDescarga() {
-    descargaAbortRef.current?.abort();
-    setDescargaEstado(null);
   }
 
   function toggleModoColocar(modo: "punto" | "captura") {
@@ -540,22 +445,22 @@ export function FincaMap() {
         </div>
       )}
 
-      {ubicacionError && (
+      {gps.error && (
         <div
           className="absolute inset-x-3 top-14 z-20 rounded-lg bg-alert px-3 py-2 text-center text-xs text-white"
-          onClick={() => setUbicacionError(null)}
+          onClick={gps.dismissError}
         >
-          {ubicacionError}
+          {gps.error}
         </div>
       )}
 
       <button
         type="button"
-        onClick={toggleUbicacion}
-        aria-label={siguiendoUbicacion ? "Dejar de mostrar mi ubicación" : "Mostrar mi ubicación"}
+        onClick={gps.toggle}
+        aria-label={gps.siguiendo ? "Dejar de mostrar mi ubicación" : "Mostrar mi ubicación"}
         title="Mi ubicación"
         className={`absolute right-3 top-16 z-20 flex h-11 w-11 items-center justify-center rounded-full text-lg shadow ${
-          siguiendoUbicacion ? "bg-primary text-white" : "border border-border bg-bg-card text-ink"
+          gps.siguiendo ? "bg-primary text-white" : "border border-border bg-bg-card text-ink"
         }`}
       >
         🛰️
@@ -678,14 +583,14 @@ export function FincaMap() {
         />
       )}
 
-      {descargaEstado && (
+      {descarga.estado && (
         <DescargaMapaModal
-          estado={descargaEstado}
-          totalTiles={descargaTiles.length}
-          progreso={descargaProgreso}
-          onConfirmar={() => void handleConfirmarDescarga()}
-          onCancelar={handleCancelarDescarga}
-          onCerrar={() => setDescargaEstado(null)}
+          estado={descarga.estado}
+          totalTiles={descarga.tiles.length}
+          progreso={descarga.progreso}
+          onConfirmar={() => void descarga.confirmar()}
+          onCancelar={descarga.cancelar}
+          onCerrar={descarga.cerrar}
         />
       )}
     </div>
