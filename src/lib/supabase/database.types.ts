@@ -377,6 +377,46 @@ export interface Database {
           },
         ];
       };
+      lista_maleta: {
+        Row: {
+          id: string;
+          texto: string;
+          hecho: boolean;
+          responsable: string;
+          creado_por: string;
+          fecha_creacion: string;
+        };
+        Insert: {
+          id?: string;
+          texto: string;
+          hecho?: boolean;
+          responsable: string;
+          creado_por?: string;
+          fecha_creacion?: string;
+        };
+        Update: {
+          id?: string;
+          texto?: string;
+          hecho?: boolean;
+          responsable?: string;
+          creado_por?: string;
+          fecha_creacion?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lista_maleta_responsable_fkey";
+            columns: ["responsable"];
+            referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "lista_maleta_creado_por_fkey";
+            columns: ["creado_por"];
+            referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       finca_limite_actual: {

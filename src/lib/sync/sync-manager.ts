@@ -38,6 +38,7 @@ const TABLE_BY_ENTITY = {
   espera: "esperas",
   calendario_asistencia: "calendario_asistencias",
   gasto: "gastos",
+  item_lista: "lista_maleta",
 } as const;
 
 // finca_limite es de solo-inserción: cada edición crea una versión nueva
