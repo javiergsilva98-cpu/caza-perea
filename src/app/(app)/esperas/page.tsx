@@ -5,13 +5,13 @@ import { listEsperas, crearEspera, borrarEspera } from "@/lib/data/esperas";
 import { listPuntosInteres } from "@/lib/data/puntos-interes";
 import { listUsuarios, type UsuarioBasico } from "@/lib/data/usuarios";
 import { startSyncTriggers } from "@/lib/sync/sync-manager";
-import { createClient } from "@/lib/supabase/client";
 import type { EsperaRow, PuntoInteresRow } from "@/lib/offline/db";
 import { EsperaForm, type EsperaFormValues } from "@/components/esperas/EsperaForm";
 import { SorteoModal } from "@/components/esperas/SorteoModal";
 import { SyncBadge } from "@/components/map/SyncBadge";
 import { formatFecha as formatFechaBase, hoyISO } from "@/lib/format";
 import { usePaginado } from "@/lib/hooks/usePaginado";
+import { useUserId } from "@/lib/hooks/useUserId";
 
 function formatFecha(iso: string) {
   return formatFechaBase(iso, { weekday: true });
@@ -21,7 +21,7 @@ export default function EsperasPage() {
   const [esperas, setEsperas] = useState<EsperaRow[]>([]);
   const [puestos, setPuestos] = useState<PuntoInteresRow[]>([]);
   const [usuarios, setUsuarios] = useState<UsuarioBasico[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
+  const userId = useUserId();
   const [showForm, setShowForm] = useState(false);
   const [showSorteo, setShowSorteo] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -30,12 +30,6 @@ export default function EsperasPage() {
   useEffect(() => {
     startSyncTriggers();
     (async () => {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUserId(session?.user.id ?? null);
-
       const [listaEsperas, listaPuntos, listaUsuarios] = await Promise.all([
         listEsperas(),
         listPuntosInteres(),

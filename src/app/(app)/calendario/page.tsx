@@ -8,7 +8,7 @@ import { listEsperas } from "@/lib/data/esperas";
 import { listPuntosInteres } from "@/lib/data/puntos-interes";
 import { listUsuarios, type UsuarioBasico } from "@/lib/data/usuarios";
 import { startSyncTriggers } from "@/lib/sync/sync-manager";
-import { createClient } from "@/lib/supabase/client";
+import { useUserId } from "@/lib/hooks/useUserId";
 import type {
   ActividadRow,
   CalendarioAsistenciaRow,
@@ -32,7 +32,7 @@ export default function CalendarioPage() {
   const [esperas, setEsperas] = useState<EsperaRow[]>([]);
   const [usuarios, setUsuarios] = useState<UsuarioBasico[]>([]);
   const [puntos, setPuntos] = useState<PuntoInteresRow[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
+  const userId = useUserId();
   const [diaSeleccionado, setDiaSeleccionado] = useState<string | null>(null);
   const [actividadEnFecha, setActividadEnFecha] = useState<string | null>(null);
   const [cambiandoAsistencia, setCambiandoAsistencia] = useState(false);
@@ -41,12 +41,6 @@ export default function CalendarioPage() {
   useEffect(() => {
     startSyncTriggers();
     (async () => {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUserId(session?.user.id ?? null);
-
       const [listaAsistencias, listaCapturas, listaActividades, listaEsperas, listaUsuarios, listaPuntos] =
         await Promise.all([
           listAsistencias(),
