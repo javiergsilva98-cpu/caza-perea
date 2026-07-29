@@ -58,12 +58,10 @@ where id = (select id from auth.users where email = 'tu-email@example.com');
   `documentos`. A diferencia del resto, es **estrictamente privado**: cada
   cazador solo ve y gestiona los suyos, ni siquiera un admin puede ver los
   de otro (mismas policies en `storage.objects`, por carpeta `{usuario_id}/`).
+- `gastos`: histórico de gastos de la finca (concepto, importe, quién lo
+  pagó, fecha). Solo registro — sin cálculo de reparto entre cazadores.
 
 RLS está activada en todas: cualquier usuario autenticado puede leer todo
 (salvo `documentos_usuario`, que es privado por cazador), pero solo puede
 editar/borrar lo suyo (o cualquier admin, salvo en documentos). Ver
 comentarios en cada migración para el detalle de las policies.
-
-Tablas previstas para sprints futuros (no creadas todavía, pero tenidas en
-cuenta en el diseño): `gastos` (item, importe, pagado_por, fecha — sin
-cálculos de reparto por ahora, solo histórico).

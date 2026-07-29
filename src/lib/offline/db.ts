@@ -8,6 +8,7 @@ export type ActividadRow = Database["public"]["Tables"]["actividades"]["Row"];
 export type EsperaRow = Database["public"]["Tables"]["esperas"]["Row"];
 export type CalendarioAsistenciaRow =
   Database["public"]["Tables"]["calendario_asistencias"]["Row"];
+export type GastoRow = Database["public"]["Tables"]["gastos"]["Row"];
 
 export type OutboxEntity =
   | "punto_interes"
@@ -15,7 +16,8 @@ export type OutboxEntity =
   | "captura_avistamiento"
   | "actividad"
   | "espera"
-  | "calendario_asistencia";
+  | "calendario_asistencia"
+  | "gasto";
 export type OutboxOp = "insert" | "update" | "delete";
 
 export interface OutboxEntry {
@@ -43,6 +45,7 @@ class CasaPereaDB extends Dexie {
   actividades!: Table<ActividadRow, string>;
   esperas!: Table<EsperaRow, string>;
   calendarioAsistencias!: Table<CalendarioAsistenciaRow, string>;
+  gastos!: Table<GastoRow, string>;
   outbox!: Table<OutboxEntry, number>;
   syncErrors!: Table<SyncErrorEntry, number>;
 
@@ -68,6 +71,10 @@ class CasaPereaDB extends Dexie {
     // v4: calendario de asistencia.
     this.version(4).stores({
       calendarioAsistencias: "id, cazador_id, fecha",
+    });
+    // v5: gastos.
+    this.version(5).stores({
+      gastos: "id, pagado_por, fecha",
     });
   }
 }
