@@ -15,11 +15,13 @@ import type { ListaMaletaRow } from "@/lib/offline/db";
 import { ListaItemForm, type ListaItemFormValues } from "@/components/lista/ListaItemForm";
 import { SyncBadge } from "@/components/map/SyncBadge";
 
+type FormState = { modo: "crear" } | { modo: "editar"; item: ListaMaletaRow };
+
 export default function ListaMaletaPage() {
   const [items, setItems] = useState<ListaMaletaRow[]>([]);
   const [usuarios, setUsuarios] = useState<UsuarioBasico[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
+  const [formState, setFormState] = useState<FormState | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -49,11 +51,18 @@ export default function ListaMaletaPage() {
   const hayLlevados = items.some((i) => i.hecho);
 
   async function handleSubmit(values: ListaItemFormValues) {
+    if (!formState) return;
     setFormError(null);
     try {
-      const row = await crearItemLista(values);
-      setItems((prev) => [...prev, row]);
-      setShowForm(false);
+      if (formState.modo === "crear") {
+        const row = await crearItemLista(values);
+        setItems((prev) => [...prev, row]);
+      } else {
+        const { item } = formState;
+        await editarItemLista(item.id, values);
+        setItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, ...values } : i)));
+      }
+      setFormState(null);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : "No se ha podido guardar");
     }
@@ -130,9 +139,19 @@ export default function ListaMaletaPage() {
               </button>
 
               <div className="min-w-0 flex-1">
-                <p className={`text-sm text-ink ${item.hecho ? "text-ink-soft line-through" : ""}`}>
-                  {item.texto}
-                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormError(null);
+                    setFormState({ modo: "editar", item });
+                  }}
+                  className="block w-full text-left"
+                >
+                  <p className={`text-sm text-ink ${item.hecho ? "text-ink-soft line-through" : ""}`}>
+                    {item.texto}
+                  </p>
+                  {item.notas && <p className="mt-0.5 text-xs text-ink-soft">{item.notas}</p>}
+                </button>
                 <select
                   value={item.responsable}
                   onChange={(e) => void handleResponsable(item, e.target.value)}
@@ -165,7 +184,7 @@ export default function ListaMaletaPage() {
           type="button"
           onClick={() => {
             setFormError(null);
-            setShowForm(true);
+            setFormState({ modo: "crear" });
           }}
           aria-label="Añadir ítem"
           title="Añadir ítem"
@@ -175,12 +194,22 @@ export default function ListaMaletaPage() {
         </button>
       </div>
 
-      {showForm && (
+      {formState && (
         <ListaItemForm
+          titulo={formState.modo === "crear" ? "Nuevo ítem" : "Editar ítem"}
+          inicial={
+            formState.modo === "editar"
+              ? {
+                  texto: formState.item.texto,
+                  responsable: formState.item.responsable,
+                  notas: formState.item.notas,
+                }
+              : undefined
+          }
           usuarios={usuarios}
           usuarioActualId={userId}
           onSubmit={handleSubmit}
-          onCancel={() => setShowForm(false)}
+          onCancel={() => setFormState(null)}
           error={formError}
         />
       )}

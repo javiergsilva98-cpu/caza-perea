@@ -383,6 +383,7 @@ export interface Database {
           texto: string;
           hecho: boolean;
           responsable: string;
+          notas: string | null;
           creado_por: string;
           fecha_creacion: string;
         };
@@ -391,6 +392,7 @@ export interface Database {
           texto: string;
           hecho?: boolean;
           responsable: string;
+          notas?: string | null;
           creado_por?: string;
           fecha_creacion?: string;
         };
@@ -399,6 +401,7 @@ export interface Database {
           texto?: string;
           hecho?: boolean;
           responsable?: string;
+          notas?: string | null;
           creado_por?: string;
           fecha_creacion?: string;
         };
