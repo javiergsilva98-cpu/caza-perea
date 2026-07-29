@@ -5,6 +5,7 @@ import { trySync } from "@/lib/sync/sync-manager";
 export interface NuevoItemLista {
   texto: string;
   responsable: string;
+  notas: string | null;
 }
 
 async function currentUserId(): Promise<string> {
@@ -42,6 +43,7 @@ export async function crearItemLista(input: NuevoItemLista): Promise<ListaMaleta
     texto: input.texto,
     hecho: false,
     responsable: input.responsable,
+    notas: input.notas,
     creado_por,
     fecha_creacion: new Date().toISOString(),
   };
@@ -61,7 +63,7 @@ export async function crearItemLista(input: NuevoItemLista): Promise<ListaMaleta
 
 export async function editarItemLista(
   id: string,
-  cambios: Partial<Pick<ListaMaletaRow, "hecho" | "responsable" | "texto">>
+  cambios: Partial<Pick<ListaMaletaRow, "hecho" | "responsable" | "texto" | "notas">>
 ): Promise<void> {
   const db = getDb();
   const existente = await db.listaMaleta.get(id);
