@@ -27,7 +27,7 @@ export default function ActividadesPage() {
   const [actividades, setActividades] = useState<ActividadRow[]>([]);
   const [puntos, setPuntos] = useState<PuntoInteresRow[]>([]);
   const [nombres, setNombres] = useState<Record<string, string>>({});
-  const [showForm, setShowForm] = useState(false);
+  const [formState, setFormState] = useState<{ puntoId?: string } | null>(null);
   const [pegarUbicacionAbierto, setPegarUbicacionAbierto] = useState(false);
   const [nuevoPuntoEn, setNuevoPuntoEn] = useState<Coords | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,7 +69,7 @@ export default function ActividadesPage() {
   async function handleSubmit(values: ActividadFormValues) {
     const row = await crearActividad(values);
     setActividades((prev) => [row, ...prev]);
-    setShowForm(false);
+    setFormState(null);
   }
 
   function handleUbicacionResuelta(coords: Coords) {
@@ -104,22 +104,25 @@ export default function ActividadesPage() {
             </h2>
             <ul className="mt-2 flex flex-col gap-2">
               {resumen.map(({ punto, ultima }) => (
-                <li
-                  key={punto.id}
-                  className="flex items-center justify-between rounded-xl border border-border bg-bg-card p-3"
-                >
-                  <span className="text-sm text-ink">
-                    {punto.tipo === "comedero" ? "🌾" : "💧"} {punto.nombre}
-                  </span>
-                  <span
-                    className={`text-xs ${
-                      !ultima || diasDesde(ultima.fecha) > 14
-                        ? "font-medium text-alert"
-                        : "text-ink-soft"
-                    }`}
+                <li key={punto.id}>
+                  <button
+                    type="button"
+                    onClick={() => setFormState({ puntoId: punto.id })}
+                    className="flex w-full items-center justify-between rounded-xl border border-border bg-bg-card p-3 text-left"
                   >
-                    {ultima ? `hace ${diasDesde(ultima.fecha)} días` : "sin registro"}
-                  </span>
+                    <span className="text-sm text-ink">
+                      {punto.tipo === "comedero" ? "🌾" : "💧"} {punto.nombre}
+                    </span>
+                    <span
+                      className={`text-xs ${
+                        !ultima || diasDesde(ultima.fecha) > 14
+                          ? "font-medium text-alert"
+                          : "text-ink-soft"
+                      }`}
+                    >
+                      {ultima ? `hace ${diasDesde(ultima.fecha)} días` : "sin registro"}
+                    </span>
+                  </button>
                 </li>
               ))}
             </ul>
@@ -181,7 +184,7 @@ export default function ActividadesPage() {
         </button>
         <button
           type="button"
-          onClick={() => setShowForm(true)}
+          onClick={() => setFormState({})}
           aria-label="Registrar actividad"
           title="Registrar actividad"
           className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-2xl leading-none text-white shadow-lg"
@@ -208,11 +211,12 @@ export default function ActividadesPage() {
         />
       )}
 
-      {showForm && (
+      {formState && (
         <ActividadForm
           puntos={puntos}
+          puntoPreseleccionado={formState.puntoId}
           onSubmit={handleSubmit}
-          onCancel={() => setShowForm(false)}
+          onCancel={() => setFormState(null)}
         />
       )}
     </div>

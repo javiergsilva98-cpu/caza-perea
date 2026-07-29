@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { logout } from "../actions";
 import { InvitarUsuarioPanel } from "@/components/perfil/InvitarUsuarioPanel";
@@ -36,6 +37,14 @@ export default async function PerfilPage() {
           <dd className="text-ink capitalize">{perfil?.rol ?? "—"}</dd>
         </div>
       </dl>
+
+      <Link
+        href="/estadisticas"
+        className="flex items-center justify-between rounded-xl border border-border bg-bg-card p-4 text-sm font-medium text-ink"
+      >
+        <span>📊 Estadísticas</span>
+        <span className="text-ink-soft">›</span>
+      </Link>
 
       <DocumentosPanel />
 
