@@ -23,7 +23,7 @@ export function TiempoWidget() {
       <button
         type="button"
         onClick={() => setAbierto(true)}
-        className="absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-full border border-border bg-bg-card px-3 py-1.5 text-sm font-medium text-ink shadow"
+        className="absolute left-3 top-[calc(0.75rem+env(safe-area-inset-top))] z-20 flex items-center gap-1.5 rounded-full border border-border bg-bg-card px-3 py-1.5 text-sm font-medium text-ink shadow"
       >
         <span className="text-base leading-none">{iconoTiempo(tiempo.codigoActual)}</span>
         {tiempo.temperaturaActual}°

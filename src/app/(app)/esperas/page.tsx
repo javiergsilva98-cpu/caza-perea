@@ -155,7 +155,7 @@ export default function EsperasPage() {
                 <button
                   type="button"
                   onClick={() => void handleDelete(e.id)}
-                  className="shrink-0 text-xs text-alert"
+                  className="shrink-0 -m-2 p-2 text-xs text-alert"
                 >
                   Quitar
                 </button>

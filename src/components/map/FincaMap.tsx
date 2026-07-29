@@ -435,7 +435,7 @@ export function FincaMap() {
           contenido opaco por encima. */}
       <div ref={containerRef} className="absolute inset-0 isolate" />
 
-      <div className="pointer-events-none absolute inset-x-0 top-3 z-20 flex justify-center px-3">
+      <div className="pointer-events-none absolute inset-x-0 top-[calc(0.75rem+env(safe-area-inset-top))] z-20 flex justify-center px-3">
         <SyncBadge />
       </div>
 
@@ -447,7 +447,7 @@ export function FincaMap() {
           onClick={() => map?.setBearing(0)}
           aria-label="Orientar el mapa al norte"
           title="Norte"
-          className="absolute right-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-bg-card text-lg shadow"
+          className="absolute right-3 top-[calc(0.75rem+env(safe-area-inset-top))] z-20 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-bg-card text-lg shadow"
         >
           <span
             className="inline-block leading-none"
@@ -459,33 +459,33 @@ export function FincaMap() {
       )}
 
       {boundaryState === "dibujando" && (
-        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-ink/80 px-3 py-2 text-center text-xs text-white">
+        <div className="pointer-events-none absolute inset-x-3 top-[calc(3.5rem+env(safe-area-inset-top))] z-20 rounded-lg bg-ink/80 px-3 py-2 text-center text-xs text-white">
           Toca cada esquina de la linde. Para terminar, toca dos veces seguidas
           o vuelve a tocar el primer punto.
         </div>
       )}
 
       {boundaryState === "editando" && (
-        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-ink/80 px-3 py-2 text-center text-xs text-white">
+        <div className="pointer-events-none absolute inset-x-3 top-[calc(3.5rem+env(safe-area-inset-top))] z-20 rounded-lg bg-ink/80 px-3 py-2 text-center text-xs text-white">
           Arrastra un punto para moverlo, o tócalo para borrarlo.
         </div>
       )}
 
       {modoColocar === "punto" && (
-        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-ink/80 px-3 py-2 text-center text-xs text-white">
+        <div className="pointer-events-none absolute inset-x-3 top-[calc(3.5rem+env(safe-area-inset-top))] z-20 rounded-lg bg-ink/80 px-3 py-2 text-center text-xs text-white">
           Toca el mapa donde quieras añadir el punto.
         </div>
       )}
 
       {modoColocar === "captura" && (
-        <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-ink/80 px-3 py-2 text-center text-xs text-white">
+        <div className="pointer-events-none absolute inset-x-3 top-[calc(3.5rem+env(safe-area-inset-top))] z-20 rounded-lg bg-ink/80 px-3 py-2 text-center text-xs text-white">
           Toca el mapa donde ha pasado.
         </div>
       )}
 
       {gps.error && (
         <div
-          className="absolute inset-x-3 top-14 z-20 rounded-lg bg-alert px-3 py-2 text-center text-xs text-white"
+          className="absolute inset-x-3 top-[calc(3.5rem+env(safe-area-inset-top))] z-20 rounded-lg bg-alert px-3 py-2 text-center text-xs text-white"
           onClick={gps.dismissError}
         >
           {gps.error}
@@ -497,7 +497,7 @@ export function FincaMap() {
         onClick={gps.toggle}
         aria-label={gps.siguiendo ? "Dejar de mostrar mi ubicación" : "Mostrar mi ubicación"}
         title="Mi ubicación"
-        className={`absolute right-3 top-16 z-20 flex h-11 w-11 items-center justify-center rounded-full text-lg shadow ${
+        className={`absolute right-3 top-[calc(4rem+env(safe-area-inset-top))] z-20 flex h-11 w-11 items-center justify-center rounded-full text-lg shadow ${
           gps.siguiendo ? "bg-primary text-white" : "border border-border bg-bg-card text-ink"
         }`}
       >

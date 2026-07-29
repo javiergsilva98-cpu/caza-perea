@@ -101,7 +101,7 @@ export default function CapturasPage() {
                   <button
                     type="button"
                     onClick={() => void handleDelete(c.id)}
-                    className="shrink-0 text-xs text-alert"
+                    className="shrink-0 -m-2 p-2 text-xs text-alert"
                   >
                     Borrar
                   </button>

@@ -7,7 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Gestión del coto de caza CU10053 (Cuenca) — Casa Perea.",
     start_url: "/",
     display: "standalone",
-    orientation: "portrait",
+    // Sin bloquear a portrait: el mapa aprovecha mejor la pantalla en
+    // horizontal para ver más terreno del coto de una vez.
     background_color: "#efe8d8",
     theme_color: "#4a5d3a",
     lang: "es",
