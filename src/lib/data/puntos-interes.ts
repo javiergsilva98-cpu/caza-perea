@@ -9,6 +9,7 @@ export interface NuevoPuntoInteres {
   lat: number;
   lng: number;
   notas: string | null;
+  foto_url?: string | null;
 }
 
 async function currentUserId(): Promise<string> {
@@ -54,7 +55,7 @@ export async function crearPuntoInteres(
     lat: input.lat,
     lng: input.lng,
     notas: input.notas,
-    foto_url: null,
+    foto_url: input.foto_url ?? null,
     creado_por,
     fecha_creacion: new Date().toISOString(),
   };

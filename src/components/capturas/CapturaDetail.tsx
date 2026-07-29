@@ -34,6 +34,14 @@ export function CapturaDetail({
         <p className="mt-1 text-xs text-ink-soft">
           {formatFecha(captura.fecha)} · {registradoPorNombre}
         </p>
+        {captura.foto_url && (
+          // eslint-disable-next-line @next/next/no-img-element -- URL de Supabase Storage, no una imagen del propio sitio
+          <img
+            src={captura.foto_url}
+            alt=""
+            className="mt-3 h-48 w-full rounded-lg object-cover"
+          />
+        )}
         {captura.notas && <p className="mt-3 text-sm text-ink-soft">{captura.notas}</p>}
 
         <div className="mt-5 flex gap-2">

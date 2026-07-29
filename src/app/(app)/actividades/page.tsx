@@ -197,7 +197,7 @@ export default function ActividadesPage() {
       {nuevoPuntoEn && (
         <PuntoForm
           titulo="Nuevo punto"
-          inicial={{ nombre: "", tipo: "comedero", notas: null }}
+          inicial={{ nombre: "", tipo: "comedero", notas: null, foto_url: null }}
           puedeEditar
           puedeBorrar={false}
           onSubmit={handlePuntoSubmit}

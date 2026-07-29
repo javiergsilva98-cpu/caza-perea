@@ -437,6 +437,7 @@ export function FincaMap() {
         nombre: values.nombre,
         tipo: values.tipo,
         notas: values.notas,
+        foto_url: values.foto_url,
         lat: puntoFormState.lat,
         lng: puntoFormState.lng,
       });
@@ -614,6 +615,7 @@ export function FincaMap() {
             nombre: puntoFormState.punto?.nombre ?? "",
             tipo: puntoFormState.punto?.tipo ?? "otro",
             notas: puntoFormState.punto?.notas ?? null,
+            foto_url: puntoFormState.punto?.foto_url ?? null,
           }}
           puedeEditar={puedeEditarPunto}
           puedeBorrar={!!puntoFormState.punto && (puntoFormState.punto.creado_por === userId || isAdmin)}

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import type { TipoPuntoInteres } from "@/lib/supabase/database.types";
 import { TIPO_LABEL } from "./icons";
+import { FotoPicker } from "@/components/FotoPicker";
+import { subirFoto } from "@/lib/data/fotos";
 
 const TIPOS: TipoPuntoInteres[] = ["comedero", "bebedero", "puesto", "casa", "otro"];
 
@@ -10,6 +12,7 @@ export interface PuntoFormValues {
   nombre: string;
   tipo: TipoPuntoInteres;
   notas: string | null;
+  foto_url: string | null;
 }
 
 function formatFecha(iso: string) {
@@ -46,14 +49,29 @@ export function PuntoForm({
   const [nombre, setNombre] = useState(inicial.nombre);
   const [tipo, setTipo] = useState<TipoPuntoInteres>(inicial.tipo);
   const [notas, setNotas] = useState(inicial.notas ?? "");
+  const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!nombre.trim()) return;
     setSaving(true);
+    setError(null);
+    let foto_url = inicial.foto_url;
+    if (fotoFile) {
+      setSubiendoFoto(true);
+      try {
+        foto_url = await subirFoto("puntos", fotoFile);
+      } catch {
+        setError("No se ha podido subir la foto (¿sin conexión?) — se guarda sin ella.");
+      } finally {
+        setSubiendoFoto(false);
+      }
+    }
     try {
-      await onSubmit({ nombre: nombre.trim(), tipo, notas: notas.trim() || null });
+      await onSubmit({ nombre: nombre.trim(), tipo, notas: notas.trim() || null, foto_url });
     } finally {
       setSaving(false);
     }
@@ -120,6 +138,12 @@ export function PuntoForm({
             />
           </div>
 
+          {puedeEditar && (
+            <FotoPicker fotoActualUrl={inicial.foto_url} onFileChange={setFotoFile} />
+          )}
+
+          {error && <p className="text-sm text-alert">{error}</p>}
+
           {onRegistrarActividad && (
             <button
               type="button"
@@ -153,7 +177,7 @@ export function PuntoForm({
                 disabled={saving}
                 className="flex-1 rounded-lg bg-primary px-4 py-3 text-sm font-medium text-white disabled:opacity-60"
               >
-                {saving ? "Guardando…" : "Guardar"}
+                {subiendoFoto ? "Subiendo foto…" : saving ? "Guardando…" : "Guardar"}
               </button>
             )}
           </div>
