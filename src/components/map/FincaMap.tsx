@@ -49,6 +49,7 @@ const ESRI_IMAGERY_URL =
   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
 const ESRI_ATTRIBUTION =
   "Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, GIS User Community";
+const BOUNDARY_OPACITY = 0.7;
 
 export function FincaMap() {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -110,7 +111,7 @@ export function FincaMap() {
     if (!map) return;
     boundaryLayerRef.current?.remove();
     const layer = L.geoJSON(geometria as unknown as GeoJSON.GeoJsonObject, {
-      style: { color: "#2563eb", weight: 3, opacity: 0.7, fill: false },
+      style: { color: "#2563eb", weight: 3, opacity: BOUNDARY_OPACITY, fill: false },
     });
     layer.addTo(map);
     boundaryLayerRef.current = layer;
@@ -202,6 +203,20 @@ export function FincaMap() {
         setCapturaCrearEn({ lat: e.latlng.lat, lng: e.latlng.lng });
         setModoColocar(null);
       }
+    });
+
+    // leaflet-rotate tiene un bug conocido en su propio código (FIXME:
+    // "layer drifts on map.setZoom()") por el que las capas vectoriales
+    // (la linde) se recalculan mal mientras el mapa está en movimiento y
+    // "saltan" a su sitio correcto al terminar. En vez de tocar la
+    // animación del mapa (afecta a todo, y desactivarla del todo provoca
+    // parpadeos peores durante el pellizco de zoom), ocultamos solo la
+    // linde mientras se mueve/hace zoom y la mostramos ya recolocada.
+    map.on("movestart", () => {
+      boundaryLayerRef.current?.setStyle({ opacity: 0 });
+    });
+    map.on("moveend", () => {
+      boundaryLayerRef.current?.setStyle({ opacity: BOUNDARY_OPACITY });
     });
 
     map.on("pm:create", (e) => {
