@@ -10,7 +10,7 @@ import {
 } from "@/lib/data/lista-maleta";
 import { listUsuarios, type UsuarioBasico } from "@/lib/data/usuarios";
 import { startSyncTriggers } from "@/lib/sync/sync-manager";
-import { createClient } from "@/lib/supabase/client";
+import { useUserId } from "@/lib/hooks/useUserId";
 import type { ListaMaletaRow } from "@/lib/offline/db";
 import { ListaItemForm, type ListaItemFormValues } from "@/components/lista/ListaItemForm";
 import { SyncBadge } from "@/components/map/SyncBadge";
@@ -20,7 +20,7 @@ type FormState = { modo: "crear" } | { modo: "editar"; item: ListaMaletaRow };
 export default function ListaMaletaPage() {
   const [items, setItems] = useState<ListaMaletaRow[]>([]);
   const [usuarios, setUsuarios] = useState<UsuarioBasico[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
+  const userId = useUserId();
   const [formState, setFormState] = useState<FormState | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,12 +28,6 @@ export default function ListaMaletaPage() {
   useEffect(() => {
     startSyncTriggers();
     (async () => {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUserId(session?.user.id ?? null);
-
       const [listaItems, listaUsuarios] = await Promise.all([listItemsLista(), listUsuarios()]);
       setItems(listaItems);
       setUsuarios(listaUsuarios);

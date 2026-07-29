@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { listCapturas, crearCaptura, borrarCaptura } from "@/lib/data/capturas";
 import { listUsuariosNombres } from "@/lib/data/usuarios";
 import { startSyncTriggers } from "@/lib/sync/sync-manager";
-import { createClient } from "@/lib/supabase/client";
 import type { CapturaRow } from "@/lib/offline/db";
 import { CapturaForm, type CapturaFormValues } from "@/components/capturas/CapturaForm";
 import { PegarUbicacionForm } from "@/components/map/PegarUbicacionForm";
@@ -12,11 +11,12 @@ import { SyncBadge } from "@/components/map/SyncBadge";
 import type { Coords } from "@/lib/geo/google-maps";
 import { formatFecha } from "@/lib/format";
 import { usePaginado } from "@/lib/hooks/usePaginado";
+import { useUserId } from "@/lib/hooks/useUserId";
 
 export default function CapturasPage() {
   const [capturas, setCapturas] = useState<CapturaRow[]>([]);
   const [nombres, setNombres] = useState<Record<string, string>>({});
-  const [userId, setUserId] = useState<string | null>(null);
+  const userId = useUserId();
   const [showForm, setShowForm] = useState(false);
   const [pegarUbicacionAbierto, setPegarUbicacionAbierto] = useState(false);
   const [ubicacionPendiente, setUbicacionPendiente] = useState<Coords | null>(null);
@@ -25,12 +25,6 @@ export default function CapturasPage() {
   useEffect(() => {
     startSyncTriggers();
     (async () => {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUserId(session?.user.id ?? null);
-
       const [lista, mapaNombres] = await Promise.all([
         listCapturas(),
         listUsuariosNombres(),

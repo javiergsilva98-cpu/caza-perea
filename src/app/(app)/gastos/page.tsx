@@ -4,19 +4,19 @@ import { useEffect, useMemo, useState } from "react";
 import { listGastos, crearGasto, borrarGasto } from "@/lib/data/gastos";
 import { listUsuarios, type UsuarioBasico } from "@/lib/data/usuarios";
 import { startSyncTriggers } from "@/lib/sync/sync-manager";
-import { createClient } from "@/lib/supabase/client";
 import type { GastoRow } from "@/lib/offline/db";
 import { GastoForm, type GastoFormValues } from "@/components/gastos/GastoForm";
 import { SyncBadge } from "@/components/map/SyncBadge";
 import { formatFecha } from "@/lib/format";
 import { usePaginado } from "@/lib/hooks/usePaginado";
+import { useUserId } from "@/lib/hooks/useUserId";
 
 const formatoEuro = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
 
 export default function GastosPage() {
   const [gastos, setGastos] = useState<GastoRow[]>([]);
   const [usuarios, setUsuarios] = useState<UsuarioBasico[]>([]);
-  const [userId, setUserId] = useState<string | null>(null);
+  const userId = useUserId();
   const [showForm, setShowForm] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,12 +24,6 @@ export default function GastosPage() {
   useEffect(() => {
     startSyncTriggers();
     (async () => {
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUserId(session?.user.id ?? null);
-
       const [listaGastos, listaUsuarios] = await Promise.all([listGastos(), listUsuarios()]);
       setGastos(listaGastos);
       setUsuarios(listaUsuarios);
