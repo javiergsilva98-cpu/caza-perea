@@ -1,4 +1,5 @@
 const CACHE_VERSION = "casa-perea-v4";
+// Debe coincidir exactamente con TILE_CACHE en src/lib/offline/tile-cache.ts.
 const TILE_CACHE = "casa-perea-tiles-v1";
 const CURRENT_CACHES = [CACHE_VERSION, TILE_CACHE];
 
@@ -35,13 +36,6 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// Nunca interceptar peticiones a Supabase (auth/API): deben ir siempre a
-// red y ser gestionadas por la app (que tiene su propia cola offline en
-// IndexedDB), no cacheadas por el service worker.
-function isSupabaseRequest(url) {
-  return /supabase\.co$/.test(url.hostname) || /supabase\.in$/.test(url.hostname);
-}
-
 // Teselas del mapa satélite (Esri World Imagery): cada URL identifica una
 // tesela concreta (z/y/x) cuyo contenido no cambia, así que cachearlas
 // agresivamente permite ver el mapa de zonas ya visitadas sin cobertura.
@@ -73,8 +67,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (url.origin !== self.location.origin) return; // incluye Supabase y otros orígenes
-  if (isSupabaseRequest(url)) return;
+  // Nunca interceptar peticiones cruzadas de origen que no sean teselas
+  // (Supabase auth/API incluido): deben ir siempre a red y ser gestionadas
+  // por la app, que tiene su propia cola offline en IndexedDB.
+  if (url.origin !== self.location.origin) return;
 
   // Navegaciones: red primero, con fallback a caché y luego a /offline.
   if (request.mode === "navigate") {

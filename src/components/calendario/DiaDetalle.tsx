@@ -1,13 +1,7 @@
 "use client";
 
 import type { ActividadRow, CapturaRow, EsperaRow } from "@/lib/offline/db";
-
-const TIPO_ACTIVIDAD_LABEL: Record<string, string> = {
-  rellenado: "Rellenado",
-  revision: "Revisión",
-  reparacion: "Reparación",
-  otro: "Otro",
-};
+import { TIPO_ACTIVIDAD_LABEL } from "@/components/map/icons";
 
 function formatFechaLarga(fecha: string) {
   const texto = new Date(fecha + "T00:00:00").toLocaleDateString("es-ES", {

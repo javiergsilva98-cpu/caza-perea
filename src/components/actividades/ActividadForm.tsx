@@ -3,14 +3,10 @@
 import { useState } from "react";
 import type { PuntoInteresRow } from "@/lib/offline/db";
 import type { TipoActividad } from "@/lib/supabase/database.types";
-import { TIPO_EMOJI } from "@/components/map/icons";
+import { TIPO_EMOJI, TIPO_ACTIVIDAD_LABEL } from "@/components/map/icons";
+import { hoyISO } from "@/lib/format";
 
-const TIPOS: { value: TipoActividad; label: string }[] = [
-  { value: "rellenado", label: "Rellenado" },
-  { value: "revision", label: "Revisión" },
-  { value: "reparacion", label: "Reparación" },
-  { value: "otro", label: "Otro" },
-];
+const TIPOS = Object.entries(TIPO_ACTIVIDAD_LABEL) as [TipoActividad, string][];
 
 export interface ActividadFormValues {
   punto_interes_id: string;
@@ -18,10 +14,6 @@ export interface ActividadFormValues {
   fecha: string;
   proxima_fecha_estimada: string | null;
   notas: string | null;
-}
-
-function hoyISO() {
-  return new Date().toISOString().slice(0, 10);
 }
 
 export function ActividadForm({
@@ -114,18 +106,18 @@ export function ActividadForm({
           <div className="flex flex-col gap-1">
             <span className="text-sm font-medium text-ink">Tipo</span>
             <div className="grid grid-cols-4 gap-2">
-              {TIPOS.map((t) => (
+              {TIPOS.map(([value, label]) => (
                 <button
-                  key={t.value}
+                  key={value}
                   type="button"
-                  onClick={() => setTipo(t.value)}
+                  onClick={() => setTipo(value)}
                   className={`rounded-lg border px-2 py-2 text-xs ${
-                    tipo === t.value
+                    tipo === value
                       ? "border-primary bg-primary/10 text-primary"
                       : "border-border text-ink-soft"
                   }`}
                 >
-                  {t.label}
+                  {label}
                 </button>
               ))}
             </div>
