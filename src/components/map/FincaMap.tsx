@@ -187,13 +187,6 @@ export function FincaMap() {
       bearing: 0,
       touchRotate: true,
       rotateControl: { position: "topright", closeOnZeroBearing: false },
-      // leaflet-rotate tiene un bug conocido (documentado como FIXME en su
-      // propio código: "layer drifts on map.setZoom()") por el que las capas
-      // vectoriales (la linde) se desplazan durante el fotograma animado del
-      // zoom y luego "saltan" a su posición correcta al terminar. Al
-      // desactivar la animación de zoom, Leaflet salta directamente al nivel
-      // final sin ese fotograma intermedio erróneo.
-      zoomAnimation: false,
     });
     L.tileLayer(ESRI_IMAGERY_URL, { maxZoom: 19, attribution: ESRI_ATTRIBUTION }).addTo(map);
     // Quita el "Leaflet | 🇺🇦" que añade Leaflet por defecto — dejamos solo
