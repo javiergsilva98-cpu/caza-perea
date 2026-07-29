@@ -60,6 +60,17 @@ export default function GastosPage() {
       .sort((a, b) => b.total - a.total);
   }, [gastos, usuarios]);
 
+  const totalPorProveedor = useMemo(() => {
+    const acc = new Map<string, number>();
+    for (const g of gastos) {
+      if (!g.proveedor) continue;
+      acc.set(g.proveedor, (acc.get(g.proveedor) ?? 0) + g.importe);
+    }
+    return Array.from(acc.entries())
+      .map(([proveedor, total]) => ({ proveedor, total }))
+      .sort((a, b) => b.total - a.total);
+  }, [gastos]);
+
   async function handleSubmit(values: GastoFormValues) {
     setFormError(null);
     try {
@@ -104,6 +115,20 @@ export default function GastosPage() {
           </div>
         )}
 
+        {!loading && totalPorProveedor.length > 1 && (
+          <div className="mt-3 rounded-xl border border-border bg-bg-card p-3">
+            <p className="text-sm text-ink-soft">Por proveedor</p>
+            <div className="mt-2 flex flex-col gap-1">
+              {totalPorProveedor.map(({ proveedor, total: t }) => (
+                <div key={proveedor} className="flex items-center justify-between text-sm">
+                  <span className="text-ink">{proveedor}</span>
+                  <span className="text-ink-soft">{formatoEuro.format(t)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {loading && <p className="mt-4 text-sm text-ink-soft">Cargando…</p>}
 
         {!loading && gastos.length === 0 && (
@@ -122,6 +147,7 @@ export default function GastosPage() {
                   </span>
                   <p className="mt-0.5 text-xs text-ink-soft">
                     {formatFecha(g.fecha)} · Pagado por {nombrePorId[g.pagado_por] ?? "—"}
+                    {g.proveedor && ` · ${g.proveedor}`}
                   </p>
                   {g.notas && <p className="mt-1 text-sm text-ink-soft">{g.notas}</p>}
                 </div>

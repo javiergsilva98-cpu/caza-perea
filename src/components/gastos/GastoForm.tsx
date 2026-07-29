@@ -9,6 +9,7 @@ export interface GastoFormValues {
   pagado_por: string;
   fecha: string;
   notas: string | null;
+  proveedor: string | null;
 }
 
 function hoyISO() {
@@ -32,6 +33,7 @@ export function GastoForm({
   const [importe, setImporte] = useState("");
   const [pagadoPor, setPagadoPor] = useState(usuarioActualId ?? usuarios[0]?.id ?? "");
   const [fecha, setFecha] = useState(hoyISO());
+  const [proveedor, setProveedor] = useState("");
   const [notas, setNotas] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -47,6 +49,7 @@ export function GastoForm({
         pagado_por: pagadoPor,
         fecha,
         notas: notas.trim() || null,
+        proveedor: proveedor.trim() || null,
       });
     } finally {
       setSaving(false);
@@ -102,6 +105,19 @@ export function GastoForm({
                 className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
               />
             </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label htmlFor="gasto-proveedor" className="text-sm font-medium text-ink">
+              Proveedor (opcional)
+            </label>
+            <input
+              id="gasto-proveedor"
+              value={proveedor}
+              onChange={(e) => setProveedor(e.target.value)}
+              placeholder="Piensos Fulanito, Gasolinera…"
+              className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
+            />
           </div>
 
           <div className="flex flex-col gap-1">

@@ -8,6 +8,7 @@ export interface NuevoGasto {
   pagado_por: string;
   fecha: string; // YYYY-MM-DD
   notas: string | null;
+  proveedor: string | null;
 }
 
 async function currentUserId(): Promise<string> {
@@ -49,6 +50,7 @@ export async function crearGasto(input: NuevoGasto): Promise<GastoRow> {
     pagado_por: input.pagado_por,
     fecha: input.fecha,
     notas: input.notas,
+    proveedor: input.proveedor,
     registrado_por,
     fecha_registro: new Date().toISOString(),
   };

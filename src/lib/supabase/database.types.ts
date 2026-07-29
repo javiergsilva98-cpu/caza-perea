@@ -336,6 +336,7 @@ export interface Database {
           pagado_por: string;
           fecha: string;
           notas: string | null;
+          proveedor: string | null;
           registrado_por: string;
           fecha_registro: string;
         };
@@ -346,6 +347,7 @@ export interface Database {
           pagado_por: string;
           fecha: string;
           notas?: string | null;
+          proveedor?: string | null;
           registrado_por?: string;
           fecha_registro?: string;
         };
@@ -356,6 +358,7 @@ export interface Database {
           pagado_por?: string;
           fecha?: string;
           notas?: string | null;
+          proveedor?: string | null;
           registrado_por?: string;
           fecha_registro?: string;
         };
