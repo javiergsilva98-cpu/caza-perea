@@ -42,6 +42,9 @@ export default function CapturasPage() {
       lng: ubicacionPendiente?.lng ?? null,
     });
     setCapturas((prev) => [row, ...prev]);
+  }
+
+  function handleCerrarForm() {
     setShowForm(false);
     setUbicacionPendiente(null);
   }
@@ -143,15 +146,7 @@ export default function CapturasPage() {
         </button>
       </div>
 
-      {showForm && (
-        <CapturaForm
-          onSubmit={handleSubmit}
-          onCancel={() => {
-            setShowForm(false);
-            setUbicacionPendiente(null);
-          }}
-        />
-      )}
+      {showForm && <CapturaForm onSubmit={handleSubmit} onCerrar={handleCerrarForm} />}
 
       {pegarUbicacionAbierto && (
         <PegarUbicacionForm

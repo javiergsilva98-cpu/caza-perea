@@ -73,8 +73,11 @@ export function FincaMap() {
   // necesitan un valor reactivo para saber en qué momento el mapa ya existe
   // (una ref no dispara sus efectos).
   const [map, setMap] = useState<L.Map | null>(null);
+  const [bearing, setBearing] = useState(0);
   const gps = useGpsLocation(map);
   const descarga = useOfflineDownload(map, ESRI_IMAGERY_URL);
+
+  const editandoRotacion = boundaryState !== "idle" || modoColocar !== null;
 
   useEffect(() => {
     modoRef.current = modoColocar;
@@ -86,8 +89,7 @@ export function FincaMap() {
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
-    const editando = boundaryState !== "idle" || modoColocar !== null;
-    if (editando) {
+    if (editandoRotacion) {
       map.setBearing(0);
       map.touchRotate.disable();
       map.shiftKeyRotate.disable();
@@ -95,9 +97,7 @@ export function FincaMap() {
       map.touchRotate.enable();
       map.shiftKeyRotate.enable();
     }
-    const control = map.rotateControl?.getContainer();
-    if (control) control.style.display = editando ? "none" : "";
-  }, [boundaryState, modoColocar]);
+  }, [editandoRotacion]);
 
   function renderBoundary(geometria: Json) {
     const map = mapRef.current;
@@ -176,16 +176,21 @@ export function FincaMap() {
       // Rotación libre (brújula arrastrable + dos dedos), predeterminada al
       // norte. Se bloquea mientras se edita la linde o se coloca un punto —
       // ver el efecto más abajo — para no arriesgar que un toque se
-      // interprete en el sitio equivocado por culpa del giro.
+      // interprete en el sitio equivocado por culpa del giro. El control
+      // nativo de leaflet-rotate se desactiva: se sustituye por un botón
+      // propio (más abajo en el JSX) con el mismo estilo que el resto de
+      // controles flotantes.
       rotate: true,
       bearing: 0,
       touchRotate: true,
-      rotateControl: { position: "topright", closeOnZeroBearing: false },
+      rotateControl: false,
     });
     L.tileLayer(ESRI_IMAGERY_URL, { maxZoom: 19, attribution: ESRI_ATTRIBUTION }).addTo(map);
     // Quita el "Leaflet | 🇺🇦" que añade Leaflet por defecto — dejamos solo
     // el crédito de Esri, obligatorio por las condiciones de uso gratuito.
     map.attributionControl.setPrefix(false);
+
+    map.on("rotate", () => setBearing(map.getBearing()));
 
     map.on("click", (e: L.LeafletMouseEvent) => {
       const modo = modoRef.current;
@@ -381,7 +386,6 @@ export function FincaMap() {
     if (!capturaCrearEn) return;
     const row = await crearCaptura({ ...values, lat: capturaCrearEn.lat, lng: capturaCrearEn.lng });
     addOrUpdateCapturaMarker(row);
-    setCapturaCrearEn(null);
   }
 
   async function handleCapturaDelete() {
@@ -419,6 +423,23 @@ export function FincaMap() {
       </div>
 
       <TiempoWidget />
+
+      {!editandoRotacion && (
+        <button
+          type="button"
+          onClick={() => map?.setBearing(0)}
+          aria-label="Orientar el mapa al norte"
+          title="Norte"
+          className="absolute right-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-bg-card text-lg shadow"
+        >
+          <span
+            className="inline-block leading-none"
+            style={{ transform: `rotate(${-bearing}deg)` }}
+          >
+            🧭
+          </span>
+        </button>
+      )}
 
       {boundaryState === "dibujando" && (
         <div className="pointer-events-none absolute inset-x-3 top-14 z-20 rounded-lg bg-ink/80 px-3 py-2 text-center text-xs text-white">
@@ -561,7 +582,7 @@ export function FincaMap() {
       )}
 
       {capturaCrearEn && (
-        <CapturaForm onSubmit={handleCapturaSubmit} onCancel={() => setCapturaCrearEn(null)} />
+        <CapturaForm onSubmit={handleCapturaSubmit} onCerrar={() => setCapturaCrearEn(null)} />
       )}
 
       {capturaDetalle && (

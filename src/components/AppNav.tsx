@@ -11,7 +11,6 @@ const HERRAMIENTAS = [
   { href: "/calendario", label: "Calendario", icon: "📅" },
   { href: "/gastos", label: "Gastos", icon: "💶" },
   { href: "/lista", label: "Maleta", icon: "🎒" },
-  { href: "/estadisticas", label: "Estadísticas", icon: "📊" },
   { href: "/perfil", label: "Perfil", icon: "👤" },
 ] as const;
 
