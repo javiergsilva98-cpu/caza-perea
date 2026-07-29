@@ -10,6 +10,7 @@ const HERRAMIENTAS = [
   { href: "/esperas", label: "Esperas", icon: "🪑" },
   { href: "/calendario", label: "Calendario", icon: "📅" },
   { href: "/gastos", label: "Gastos", icon: "💶" },
+  { href: "/estadisticas", label: "Estadísticas", icon: "📊" },
   { href: "/perfil", label: "Perfil", icon: "👤" },
 ] as const;
 
