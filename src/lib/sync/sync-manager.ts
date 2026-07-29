@@ -111,14 +111,36 @@ let started = false;
 // conexión, al volver la pestaña a primer plano, y cada 30s como red de
 // seguridad — sin depender de la Background Sync API (no soportada en
 // iOS Safari, el navegador que más nos importa aquí).
+//
+// El intervalo de 30s solo corre mientras la app está en primer plano: si
+// se queda en el bolsillo todo el día de caza, no tiene sentido seguir
+// despertando el dispositivo en segundo plano sin nada que sincronizar.
+let syncInterval: number | null = null;
+
+function startSyncInterval() {
+  if (syncInterval !== null) return;
+  syncInterval = window.setInterval(() => void trySync(), 30_000);
+}
+
+function stopSyncInterval() {
+  if (syncInterval === null) return;
+  window.clearInterval(syncInterval);
+  syncInterval = null;
+}
+
 export function startSyncTriggers() {
   if (started || typeof window === "undefined") return;
   started = true;
 
   window.addEventListener("online", () => void trySync());
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") void trySync();
+    if (document.visibilityState === "visible") {
+      void trySync();
+      startSyncInterval();
+    } else {
+      stopSyncInterval();
+    }
   });
-  window.setInterval(() => void trySync(), 30_000);
+  if (document.visibilityState === "visible") startSyncInterval();
   void trySync();
 }

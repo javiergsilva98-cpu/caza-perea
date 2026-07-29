@@ -17,13 +17,36 @@ export function SyncBadge() {
     const refresh = () => void pendingCount().then(setPending);
     refresh();
     const unsubscribe = onSyncStateChange(refresh);
-    const interval = window.setInterval(refresh, 5_000);
+
+    // El sondeo de 5s solo corre con la pantalla visible: en segundo plano
+    // ya no aporta nada (nadie lo está mirando) y solo gasta batería.
+    let interval: number | null = null;
+    function startInterval() {
+      if (interval !== null) return;
+      interval = window.setInterval(refresh, 5_000);
+    }
+    function stopInterval() {
+      if (interval === null) return;
+      window.clearInterval(interval);
+      interval = null;
+    }
+    function handleVisibility() {
+      if (document.visibilityState === "visible") {
+        refresh();
+        startInterval();
+      } else {
+        stopInterval();
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+    if (document.visibilityState === "visible") startInterval();
 
     return () => {
       window.removeEventListener("online", updateOnline);
       window.removeEventListener("offline", updateOnline);
       unsubscribe();
-      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      stopInterval();
     };
   }, []);
 
