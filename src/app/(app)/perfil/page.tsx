@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logout } from "../actions";
 import { InvitarUsuarioPanel } from "@/components/perfil/InvitarUsuarioPanel";
 import { DocumentosPanel } from "@/components/perfil/DocumentosPanel";
+import { NombreField } from "@/components/perfil/NombreField";
 
 export default async function PerfilPage() {
   const supabase = await createClient();
@@ -25,10 +26,7 @@ export default async function PerfilPage() {
       <h1 className="text-xl font-semibold text-ink">Perfil</h1>
 
       <dl className="flex flex-col gap-3 rounded-xl border border-border bg-bg-card p-4 text-sm">
-        <div className="flex justify-between gap-4">
-          <dt className="text-ink-soft">Nombre</dt>
-          <dd className="text-ink">{perfil?.nombre ?? "—"}</dd>
-        </div>
+        <NombreField userId={user.id} nombreInicial={perfil?.nombre ?? ""} />
         <div className="flex justify-between gap-4">
           <dt className="text-ink-soft">Email</dt>
           <dd className="text-ink">{user.email}</dd>
