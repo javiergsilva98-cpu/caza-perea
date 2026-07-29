@@ -149,7 +149,9 @@ export default function ListaMaletaPage() {
                 <select
                   value={item.responsable}
                   onChange={(e) => void handleResponsable(item, e.target.value)}
-                  className="mt-1 rounded-md border border-border bg-bg px-2 py-0.5 text-xs text-ink-soft outline-none"
+                  // text-base (16px): por debajo de eso Safari hace zoom
+                  // automático de toda la página al enfocar el desplegable.
+                  className="mt-1 rounded-md border border-border bg-bg px-2 py-1 text-base text-ink-soft outline-none"
                 >
                   {usuarios.map((u) => (
                     <option key={u.id} value={u.id}>
@@ -163,7 +165,7 @@ export default function ListaMaletaPage() {
                 <button
                   type="button"
                   onClick={() => void handleDelete(item.id)}
-                  className="shrink-0 text-xs text-alert"
+                  className="shrink-0 -m-2 p-2 text-xs text-alert"
                 >
                   Borrar
                 </button>
