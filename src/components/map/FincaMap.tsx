@@ -31,6 +31,7 @@ import { ActividadForm, type ActividadFormValues } from "@/components/actividade
 import { DescargaMapaModal } from "./DescargaMapaModal";
 import { useGpsLocation } from "@/lib/hooks/useGpsLocation";
 import { useOfflineDownload } from "@/lib/hooks/useOfflineDownload";
+import { useMapTools } from "@/lib/map-tools-context";
 
 interface PuntoFormState {
   modo: "crear" | "editar";
@@ -292,11 +293,6 @@ export function FincaMap() {
     setBoundaryState("idle");
   }
 
-  function handleAbrirDescarga() {
-    descarga.abrir();
-    setMenuAbierto(false);
-  }
-
   function toggleModoColocar(modo: "punto" | "captura") {
     if (boundaryState !== "idle") resetLindeAIdle();
     setModoColocar((actual) => (actual === modo ? null : modo));
@@ -306,7 +302,6 @@ export function FincaMap() {
   function handleBoundaryButton() {
     const map = mapRef.current;
     if (!map) return;
-    setMenuAbierto(false);
 
     if (boundaryState === "idle") {
       setModoColocar(null);
@@ -355,6 +350,28 @@ export function FincaMap() {
       void guardarFincaLimite(geometria as unknown as Json);
     }
   }
+
+  // "Editar linde" y "Descargar zona" viven en la lista de herramientas del
+  // AppNav (fuera de este árbol) — se registran aquí para que ese menú
+  // pueda dispararlas, y se retiran al desmontar el mapa.
+  const { setTools } = useMapTools();
+  useEffect(() => {
+    setTools({
+      editarLinde: handleBoundaryButton,
+      editarLindeLabel:
+        boundaryState === "idle"
+          ? "Editar linde"
+          : boundaryState === "dibujando"
+            ? "Cancelar"
+            : "Guardar linde",
+      editarLindeIcono: boundaryState === "idle" ? "✏️" : boundaryState === "dibujando" ? "✕" : "✓",
+      editarLindeActivo: boundaryState !== "idle",
+      descargarZona: descarga.abrir,
+    });
+    return () => setTools({});
+    // handleBoundaryButton se recrea cada render; lo que de verdad determina su contenido ya está abajo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boundaryState, descarga.abrir, setTools]);
 
   async function handlePuntoSubmit(values: PuntoFormValues) {
     if (!puntoFormState) return;
@@ -488,26 +505,8 @@ export function FincaMap() {
       </button>
 
       <div className="absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] right-3 z-20 flex flex-col items-end gap-2">
-        {(menuAbierto || boundaryState !== "idle" || modoColocar !== null) && (
+        {(menuAbierto || modoColocar !== null) && (
           <>
-            <button
-              type="button"
-              onClick={handleBoundaryButton}
-              className={`flex items-center gap-2 rounded-full py-2 pl-3 pr-4 text-sm font-medium shadow ${
-                boundaryState !== "idle"
-                  ? "bg-alert text-white"
-                  : "border border-border bg-bg-card text-ink"
-              }`}
-            >
-              <span className="text-xl leading-none">
-                {boundaryState === "idle" && "✏️"}
-                {boundaryState === "dibujando" && "✕"}
-                {boundaryState === "editando" && "✓"}
-              </span>
-              {boundaryState === "idle" && "Editar linde"}
-              {boundaryState === "dibujando" && "Cancelar"}
-              {boundaryState === "editando" && "Guardar linde"}
-            </button>
             <button
               type="button"
               onClick={() => toggleModoColocar("captura")}
@@ -531,14 +530,6 @@ export function FincaMap() {
             >
               <span className="text-xl leading-none">📍</span>
               {modoColocar === "punto" ? "Toca el mapa" : "Añadir punto"}
-            </button>
-            <button
-              type="button"
-              onClick={handleAbrirDescarga}
-              className="flex items-center gap-2 rounded-full border border-border bg-bg-card py-2 pl-3 pr-4 text-sm font-medium text-ink shadow"
-            >
-              <span className="text-xl leading-none">⬇️</span>
-              Descargar zona
             </button>
           </>
         )}
