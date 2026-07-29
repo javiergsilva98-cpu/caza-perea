@@ -3,16 +3,13 @@
 import { useState } from "react";
 import type { PuntoInteresRow } from "@/lib/offline/db";
 import type { UsuarioBasico } from "@/lib/data/usuarios";
+import { hoyISO } from "@/lib/format";
 
 export interface EsperaFormValues {
   puesto_id: string;
   cazador_id: string;
   fecha: string;
   notas: string | null;
-}
-
-function hoyISO() {
-  return new Date().toISOString().slice(0, 10);
 }
 
 export function EsperaForm({

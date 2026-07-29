@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { TipoCaptura } from "@/lib/supabase/database.types";
 import { FotoPicker } from "@/components/FotoPicker";
 import { subirFoto } from "@/lib/data/fotos";
+import { hoyISO } from "@/lib/format";
 
 const ESPECIES_SUGERIDAS = [
   "Jabalí",
@@ -24,9 +25,6 @@ export interface CapturaFormValues {
   foto_url: string | null;
 }
 
-function hoyISO() {
-  return new Date().toISOString().slice(0, 10);
-}
 
 export function CapturaForm({
   onSubmit,

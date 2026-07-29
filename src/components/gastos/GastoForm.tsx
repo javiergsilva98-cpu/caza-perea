@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { UsuarioBasico } from "@/lib/data/usuarios";
+import { hoyISO } from "@/lib/format";
 
 export interface GastoFormValues {
   concepto: string;
@@ -10,10 +11,6 @@ export interface GastoFormValues {
   fecha: string;
   notas: string | null;
   proveedor: string | null;
-}
-
-function hoyISO() {
-  return new Date().toISOString().slice(0, 10);
 }
 
 export function GastoForm({

@@ -13,25 +13,13 @@ import {
 import { SyncBadge } from "@/components/map/SyncBadge";
 import { PegarUbicacionForm } from "@/components/map/PegarUbicacionForm";
 import { PuntoForm, type PuntoFormValues } from "@/components/map/PuntoForm";
+import { TIPO_ACTIVIDAD_LABEL } from "@/components/map/icons";
 import type { Coords } from "@/lib/geo/google-maps";
-
-const TIPO_LABEL: Record<string, string> = {
-  rellenado: "Rellenado",
-  revision: "Revisión",
-  reparacion: "Reparación",
-  otro: "Otro",
-};
+import { formatFecha } from "@/lib/format";
 
 function diasDesde(fechaISO: string): number {
   const ms = Date.now() - new Date(fechaISO + "T00:00:00").getTime();
   return Math.floor(ms / (1000 * 60 * 60 * 24));
-}
-
-function formatFecha(iso: string) {
-  return new Date(iso + "T00:00:00").toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "short",
-  });
 }
 
 export default function ActividadesPage() {
@@ -153,7 +141,7 @@ export default function ActividadesPage() {
                 className="rounded-xl border border-border bg-bg-card p-3"
               >
                 <span className="text-sm font-medium text-ink">
-                  {TIPO_LABEL[a.tipo] ?? a.tipo} · {punto?.nombre ?? "Punto eliminado"}
+                  {TIPO_ACTIVIDAD_LABEL[a.tipo] ?? a.tipo} · {punto?.nombre ?? "Punto eliminado"}
                 </span>
                 <p className="mt-0.5 text-xs text-ink-soft">
                   {formatFecha(a.fecha)} · {nombres[a.realizado_por] ?? "—"}

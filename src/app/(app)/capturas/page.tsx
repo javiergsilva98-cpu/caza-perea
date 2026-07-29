@@ -10,13 +10,7 @@ import { CapturaForm, type CapturaFormValues } from "@/components/capturas/Captu
 import { PegarUbicacionForm } from "@/components/map/PegarUbicacionForm";
 import { SyncBadge } from "@/components/map/SyncBadge";
 import type { Coords } from "@/lib/geo/google-maps";
-
-function formatFecha(iso: string) {
-  return new Date(iso + "T00:00:00").toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "short",
-  });
-}
+import { formatFecha } from "@/lib/format";
 
 export default function CapturasPage() {
   const [capturas, setCapturas] = useState<CapturaRow[]>([]);

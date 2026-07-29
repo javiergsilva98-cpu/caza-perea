@@ -10,17 +10,10 @@ import type { EsperaRow, PuntoInteresRow } from "@/lib/offline/db";
 import { EsperaForm, type EsperaFormValues } from "@/components/esperas/EsperaForm";
 import { SorteoModal } from "@/components/esperas/SorteoModal";
 import { SyncBadge } from "@/components/map/SyncBadge";
-
-function hoyISO() {
-  return new Date().toISOString().slice(0, 10);
-}
+import { formatFecha as formatFechaBase, hoyISO } from "@/lib/format";
 
 function formatFecha(iso: string) {
-  return new Date(iso + "T00:00:00").toLocaleDateString("es-ES", {
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-  });
+  return formatFechaBase(iso, { weekday: true });
 }
 
 export default function EsperasPage() {

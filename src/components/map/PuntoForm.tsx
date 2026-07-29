@@ -5,6 +5,7 @@ import type { TipoPuntoInteres } from "@/lib/supabase/database.types";
 import { TIPO_LABEL } from "./icons";
 import { FotoPicker } from "@/components/FotoPicker";
 import { subirFoto } from "@/lib/data/fotos";
+import { formatTimestamp } from "@/lib/format";
 
 const TIPOS: TipoPuntoInteres[] = ["comedero", "bebedero", "puesto", "casa", "otro"];
 
@@ -13,14 +14,6 @@ export interface PuntoFormValues {
   tipo: TipoPuntoInteres;
   notas: string | null;
   foto_url: string | null;
-}
-
-function formatFecha(iso: string) {
-  return new Date(iso).toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
 }
 
 export function PuntoForm({
@@ -84,7 +77,7 @@ export function PuntoForm({
         <h2 className="text-base font-semibold text-ink">{titulo}</h2>
         {creadoPorNombre && fechaCreacion && (
           <p className="mt-0.5 text-xs text-ink-soft">
-            Añadido por {creadoPorNombre} · {formatFecha(fechaCreacion)}
+            Añadido por {creadoPorNombre} · {formatTimestamp(fechaCreacion)}
           </p>
         )}
 

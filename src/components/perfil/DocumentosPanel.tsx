@@ -9,19 +9,12 @@ import {
   type DocumentoUsuario,
 } from "@/lib/data/documentos";
 import type { TipoDocumento } from "@/lib/supabase/database.types";
+import { formatTimestamp } from "@/lib/format";
 
 const TIPOS: { tipo: TipoDocumento; label: string }[] = [
   { tipo: "seguro", label: "Seguro de caza" },
   { tipo: "licencia", label: "Licencia de caza" },
 ];
-
-function formatFecha(iso: string) {
-  return new Date(iso).toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
 
 export function DocumentosPanel() {
   const [documentos, setDocumentos] = useState<DocumentoUsuario[]>([]);
@@ -77,7 +70,7 @@ export function DocumentosPanel() {
             <div key={tipo} className="rounded-lg border border-border p-3">
               <p className="text-sm text-ink">{label}</p>
               <p className="mt-0.5 truncate text-xs text-ink-soft">
-                {doc ? `${doc.nombre_archivo} · ${formatFecha(doc.fecha_subida)}` : "Sin subir"}
+                {doc ? `${doc.nombre_archivo} · ${formatTimestamp(doc.fecha_subida)}` : "Sin subir"}
               </p>
               <div className="mt-2 flex gap-2">
                 {doc && (

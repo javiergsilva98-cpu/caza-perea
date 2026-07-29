@@ -3,10 +3,7 @@
 import { useMemo, useState } from "react";
 import type { EsperaRow, PuntoInteresRow } from "@/lib/offline/db";
 import type { UsuarioBasico } from "@/lib/data/usuarios";
-
-function hoyISO() {
-  return new Date().toISOString().slice(0, 10);
-}
+import { hoyISO } from "@/lib/format";
 
 function barajar<T>(arr: T[]): T[] {
   const copia = [...arr];

@@ -8,15 +8,9 @@ import { createClient } from "@/lib/supabase/client";
 import type { GastoRow } from "@/lib/offline/db";
 import { GastoForm, type GastoFormValues } from "@/components/gastos/GastoForm";
 import { SyncBadge } from "@/components/map/SyncBadge";
+import { formatFecha } from "@/lib/format";
 
 const formatoEuro = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
-
-function formatFecha(iso: string) {
-  return new Date(iso + "T00:00:00").toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "short",
-  });
-}
 
 export default function GastosPage() {
   const [gastos, setGastos] = useState<GastoRow[]>([]);

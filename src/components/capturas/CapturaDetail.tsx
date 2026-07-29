@@ -1,13 +1,10 @@
 "use client";
 
 import type { CapturaRow } from "@/lib/offline/db";
+import { formatFecha as formatFechaBase } from "@/lib/format";
 
 function formatFecha(iso: string) {
-  return new Date(iso + "T00:00:00").toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  return formatFechaBase(iso, { year: true });
 }
 
 export function CapturaDetail({
