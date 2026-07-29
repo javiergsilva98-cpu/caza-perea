@@ -51,6 +51,8 @@ export function FincaMap() {
   const capturasRef = useRef<globalThis.Map<string, CapturaRow>>(new globalThis.Map());
   const boundaryLayerRef = useRef<L.GeoJSON | null>(null);
   const modoRef = useRef<ModoColocar>(null);
+  const ubicacionMarkerRef = useRef<L.CircleMarker | null>(null);
+  const ubicacionCirculoRef = useRef<L.Circle | null>(null);
 
   const [modoColocar, setModoColocar] = useState<ModoColocar>(null);
   const [boundaryState, setBoundaryState] = useState<"idle" | "dibujando" | "editando">("idle");
@@ -63,6 +65,8 @@ export function FincaMap() {
   const [nombres, setNombres] = useState<Record<string, string>>({});
   const [userId, setUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [siguiendoUbicacion, setSiguiendoUbicacion] = useState(false);
+  const [ubicacionError, setUbicacionError] = useState<string | null>(null);
 
   useEffect(() => {
     modoRef.current = modoColocar;
@@ -196,6 +200,40 @@ export function FincaMap() {
       void guardarFincaLimite(geojson as unknown as Json);
     });
 
+    map.on("locationfound", (e: L.LocationEvent) => {
+      setUbicacionError(null);
+      if (ubicacionMarkerRef.current) {
+        ubicacionMarkerRef.current.setLatLng(e.latlng);
+      } else {
+        ubicacionMarkerRef.current = L.circleMarker(e.latlng, {
+          radius: 8,
+          color: "#fff",
+          weight: 2,
+          fillColor: "#2b7de9",
+          fillOpacity: 1,
+        }).addTo(map);
+      }
+      if (ubicacionCirculoRef.current) {
+        ubicacionCirculoRef.current.setLatLng(e.latlng).setRadius(e.accuracy);
+      } else {
+        ubicacionCirculoRef.current = L.circle(e.latlng, {
+          radius: e.accuracy,
+          color: "#2b7de9",
+          weight: 1,
+          fillOpacity: 0.1,
+        }).addTo(map);
+      }
+    });
+
+    map.on("locationerror", (e: L.ErrorEvent) => {
+      setSiguiendoUbicacion(false);
+      setUbicacionError(
+        e.code === 1
+          ? "Permiso de ubicación denegado. Actívalo en los ajustes del navegador."
+          : "No se ha podido obtener tu ubicación."
+      );
+    });
+
     mapRef.current = map;
     startSyncTriggers();
 
@@ -257,6 +295,23 @@ export function FincaMap() {
       boundaryLayerRef.current?.eachLayer?.((sub) => (sub as L.Polygon).pm?.disable());
     }
     setBoundaryState("idle");
+  }
+
+  function toggleUbicacion() {
+    const map = mapRef.current;
+    if (!map) return;
+    if (siguiendoUbicacion) {
+      map.stopLocate();
+      ubicacionMarkerRef.current?.remove();
+      ubicacionMarkerRef.current = null;
+      ubicacionCirculoRef.current?.remove();
+      ubicacionCirculoRef.current = null;
+      setSiguiendoUbicacion(false);
+    } else {
+      setUbicacionError(null);
+      map.locate({ setView: true, maxZoom: 17, watch: true, enableHighAccuracy: true });
+      setSiguiendoUbicacion(true);
+    }
   }
 
   function toggleModoColocar(modo: "punto" | "captura") {
@@ -408,6 +463,27 @@ export function FincaMap() {
           Toca el mapa donde ha pasado.
         </div>
       )}
+
+      {ubicacionError && (
+        <div
+          className="absolute inset-x-3 top-14 z-20 rounded-lg bg-alert px-3 py-2 text-center text-xs text-white"
+          onClick={() => setUbicacionError(null)}
+        >
+          {ubicacionError}
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={toggleUbicacion}
+        aria-label={siguiendoUbicacion ? "Dejar de mostrar mi ubicación" : "Mostrar mi ubicación"}
+        title="Mi ubicación"
+        className={`absolute right-3 top-16 z-20 flex h-11 w-11 items-center justify-center rounded-full text-lg shadow ${
+          siguiendoUbicacion ? "bg-primary text-white" : "border border-border bg-bg-card text-ink"
+        }`}
+      >
+        🛰️
+      </button>
 
       <div className="absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] right-3 z-20 flex flex-col items-end gap-2">
         {(menuAbierto || boundaryState !== "idle" || modoColocar !== null) && (
