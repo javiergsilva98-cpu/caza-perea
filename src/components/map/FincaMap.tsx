@@ -27,6 +27,13 @@ import { SyncBadge } from "./SyncBadge";
 import { CapturaForm, type CapturaFormValues } from "@/components/capturas/CapturaForm";
 import { CapturaDetail } from "@/components/capturas/CapturaDetail";
 import { ActividadForm, type ActividadFormValues } from "@/components/actividades/ActividadForm";
+import { DescargaMapaModal } from "./DescargaMapaModal";
+import {
+  tilesParaArea,
+  descargarTeselas,
+  type ProgresoDescarga,
+  type TileCoord,
+} from "@/lib/offline/tile-cache";
 
 interface PuntoFormState {
   modo: "crear" | "editar";
@@ -53,6 +60,7 @@ export function FincaMap() {
   const modoRef = useRef<ModoColocar>(null);
   const ubicacionMarkerRef = useRef<L.CircleMarker | null>(null);
   const ubicacionCirculoRef = useRef<L.Circle | null>(null);
+  const descargaAbortRef = useRef<AbortController | null>(null);
 
   const [modoColocar, setModoColocar] = useState<ModoColocar>(null);
   const [boundaryState, setBoundaryState] = useState<"idle" | "dibujando" | "editando">("idle");
@@ -67,6 +75,11 @@ export function FincaMap() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [siguiendoUbicacion, setSiguiendoUbicacion] = useState(false);
   const [ubicacionError, setUbicacionError] = useState<string | null>(null);
+  const [descargaEstado, setDescargaEstado] = useState<
+    "confirmar" | "descargando" | "completa" | "demasiado_grande" | null
+  >(null);
+  const [descargaTiles, setDescargaTiles] = useState<TileCoord[]>([]);
+  const [descargaProgreso, setDescargaProgreso] = useState<ProgresoDescarga | null>(null);
 
   useEffect(() => {
     modoRef.current = modoColocar;
@@ -314,6 +327,50 @@ export function FincaMap() {
     }
   }
 
+  function handleAbrirDescarga() {
+    const map = mapRef.current;
+    if (!map) return;
+    const bounds = map.getBounds();
+    const zoomActual = Math.round(map.getZoom());
+    const zMin = Math.max(zoomActual - 1, 10);
+    const zMax = Math.min(zoomActual + 2, 18);
+    const tiles = tilesParaArea(
+      {
+        north: bounds.getNorth(),
+        south: bounds.getSouth(),
+        east: bounds.getEast(),
+        west: bounds.getWest(),
+      },
+      zMin,
+      zMax
+    );
+    setDescargaTiles(tiles);
+    setDescargaProgreso(null);
+    setDescargaEstado(tiles.length > 4000 ? "demasiado_grande" : "confirmar");
+    setMenuAbierto(false);
+  }
+
+  async function handleConfirmarDescarga() {
+    setDescargaEstado("descargando");
+    const controller = new AbortController();
+    descargaAbortRef.current = controller;
+    const resultado = await descargarTeselas(
+      ESRI_IMAGERY_URL,
+      descargaTiles,
+      (p) => setDescargaProgreso(p),
+      controller.signal
+    );
+    if (!controller.signal.aborted) {
+      setDescargaProgreso(resultado);
+      setDescargaEstado("completa");
+    }
+  }
+
+  function handleCancelarDescarga() {
+    descargaAbortRef.current?.abort();
+    setDescargaEstado(null);
+  }
+
   function toggleModoColocar(modo: "punto" | "captura") {
     if (boundaryState !== "idle") resetLindeAIdle();
     setModoColocar((actual) => (actual === modo ? null : modo));
@@ -530,6 +587,14 @@ export function FincaMap() {
               <span className="text-xl leading-none">📍</span>
               {modoColocar === "punto" ? "Toca el mapa" : "Añadir punto"}
             </button>
+            <button
+              type="button"
+              onClick={handleAbrirDescarga}
+              className="flex items-center gap-2 rounded-full border border-border bg-bg-card py-2 pl-3 pr-4 text-sm font-medium text-ink shadow"
+            >
+              <span className="text-xl leading-none">⬇️</span>
+              Descargar zona
+            </button>
           </>
         )}
         <button
@@ -590,6 +655,17 @@ export function FincaMap() {
           puntoPreseleccionado={actividadPuntoId}
           onSubmit={handleActividadSubmit}
           onCancel={() => setActividadPuntoId(null)}
+        />
+      )}
+
+      {descargaEstado && (
+        <DescargaMapaModal
+          estado={descargaEstado}
+          totalTiles={descargaTiles.length}
+          progreso={descargaProgreso}
+          onConfirmar={() => void handleConfirmarDescarga()}
+          onCancelar={handleCancelarDescarga}
+          onCerrar={() => setDescargaEstado(null)}
         />
       )}
     </div>
