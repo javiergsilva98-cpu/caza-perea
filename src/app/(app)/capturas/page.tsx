@@ -11,6 +11,7 @@ import { PegarUbicacionForm } from "@/components/map/PegarUbicacionForm";
 import { SyncBadge } from "@/components/map/SyncBadge";
 import type { Coords } from "@/lib/geo/google-maps";
 import { formatFecha } from "@/lib/format";
+import { usePaginado } from "@/lib/hooks/usePaginado";
 
 export default function CapturasPage() {
   const [capturas, setCapturas] = useState<CapturaRow[]>([]);
@@ -62,6 +63,8 @@ export default function CapturasPage() {
     setShowForm(true);
   }
 
+  const { visibles: capturasVisibles, hayMas, mostrarMas } = usePaginado(capturas);
+
   return (
     <div className="relative flex flex-1 flex-col">
       <div className="pointer-events-none sticky top-0 z-20 flex justify-center px-3 pt-3">
@@ -80,7 +83,7 @@ export default function CapturasPage() {
         )}
 
         <ul className="mt-4 flex flex-col gap-2">
-          {capturas.map((c) => (
+          {capturasVisibles.map((c) => (
             <li
               key={c.id}
               className="rounded-xl border border-border bg-bg-card p-3"
@@ -110,6 +113,16 @@ export default function CapturasPage() {
             </li>
           ))}
         </ul>
+
+        {hayMas && (
+          <button
+            type="button"
+            onClick={mostrarMas}
+            className="mt-3 w-full rounded-lg border border-border py-2.5 text-sm font-medium text-ink-soft"
+          >
+            Mostrar más
+          </button>
+        )}
       </div>
 
       <div className="absolute bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-20 flex flex-col items-end gap-2">
