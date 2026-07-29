@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import type { TipoCaptura } from "@/lib/supabase/database.types";
+import { FotoPicker } from "@/components/FotoPicker";
+import { subirFoto } from "@/lib/data/fotos";
 
 const ESPECIES_SUGERIDAS = [
   "Jabalí",
@@ -19,6 +21,7 @@ export interface CapturaFormValues {
   cantidad: number;
   fecha: string;
   notas: string | null;
+  foto_url: string | null;
 }
 
 function hoyISO() {
@@ -37,12 +40,27 @@ export function CapturaForm({
   const [cantidad, setCantidad] = useState(1);
   const [fecha, setFecha] = useState(hoyISO());
   const [notas, setNotas] = useState("");
+  const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!especie.trim()) return;
     setSaving(true);
+    setError(null);
+    let foto_url: string | null = null;
+    if (fotoFile) {
+      setSubiendoFoto(true);
+      try {
+        foto_url = await subirFoto("capturas", fotoFile);
+      } catch {
+        setError("No se ha podido subir la foto (¿sin conexión?) — se guarda sin ella.");
+      } finally {
+        setSubiendoFoto(false);
+      }
+    }
     try {
       await onSubmit({
         tipo,
@@ -50,6 +68,7 @@ export function CapturaForm({
         cantidad,
         fecha,
         notas: notas.trim() || null,
+        foto_url,
       });
     } finally {
       setSaving(false);
@@ -149,6 +168,10 @@ export function CapturaForm({
             />
           </div>
 
+          <FotoPicker onFileChange={setFotoFile} />
+
+          {error && <p className="text-sm text-alert">{error}</p>}
+
           <div className="flex gap-2">
             <button
               type="button"
@@ -162,7 +185,7 @@ export function CapturaForm({
               disabled={saving}
               className="flex-1 rounded-lg bg-secondary px-4 py-3 text-sm font-medium text-white disabled:opacity-60"
             >
-              {saving ? "Guardando…" : "Guardar"}
+              {subiendoFoto ? "Subiendo foto…" : saving ? "Guardando…" : "Guardar"}
             </button>
           </div>
         </form>

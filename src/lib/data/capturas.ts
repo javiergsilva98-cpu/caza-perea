@@ -11,6 +11,7 @@ export interface NuevaCaptura {
   notas: string | null;
   lat: number | null;
   lng: number | null;
+  foto_url?: string | null;
 }
 
 async function currentUserId(): Promise<string> {
@@ -54,7 +55,7 @@ export async function crearCaptura(input: NuevaCaptura): Promise<CapturaRow> {
     lng: input.lng,
     punto_interes_id: null,
     notas: input.notas,
-    foto_url: null,
+    foto_url: input.foto_url ?? null,
     registrado_por,
     fecha: input.fecha,
     fecha_registro: new Date().toISOString(),
