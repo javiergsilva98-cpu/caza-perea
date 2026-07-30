@@ -46,7 +46,7 @@ export function ListaItemForm({
   }
 
   return (
-    <BottomSheet>
+    <BottomSheet onBackdropClick={onCancel}>
       <h2 className="text-base font-semibold text-ink">{titulo}</h2>
 
       <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">

@@ -72,7 +72,7 @@ export function PuntoForm({
   }
 
   return (
-    <BottomSheet>
+    <BottomSheet onBackdropClick={onCancel}>
       <h2 className="text-base font-semibold text-ink">{titulo}</h2>
       {creadoPorNombre && fechaCreacion && (
         <p className="mt-0.5 text-xs text-ink-soft">

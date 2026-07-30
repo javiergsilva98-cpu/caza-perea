@@ -79,7 +79,7 @@ export function CapturaForm({
   }
 
   return (
-    <BottomSheet>
+    <BottomSheet onBackdropClick={onCerrar}>
       <h2 className="text-base font-semibold text-ink">Nueva captura/avistamiento</h2>
 
       {anadidas.length > 0 && (
