@@ -12,6 +12,7 @@ const HERRAMIENTAS = [
   { href: "/calendario", label: "Calendario", icon: "📅" },
   { href: "/gastos", label: "Gastos", icon: "💶" },
   { href: "/lista", label: "Maleta", icon: "🎒" },
+  { href: "/tiempo", label: "Tiempo", icon: "🌤️" },
 ] as const;
 
 const BOTTOM_SAFE = "bottom-[calc(1rem+env(safe-area-inset-bottom))]";

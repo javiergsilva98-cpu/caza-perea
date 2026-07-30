@@ -552,6 +552,8 @@ export function FincaMap() {
             notas: puntoFormState.punto?.notas ?? null,
             foto_url: puntoFormState.punto?.foto_url ?? null,
           }}
+          lat={puntoFormState.lat}
+          lng={puntoFormState.lng}
           puedeEditar={puedeEditarPunto}
           puedeBorrar={!!puntoFormState.punto && (puntoFormState.punto.creado_por === userId || isAdmin)}
           onSubmit={handlePuntoSubmit}
