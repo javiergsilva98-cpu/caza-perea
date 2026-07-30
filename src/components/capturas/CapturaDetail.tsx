@@ -22,7 +22,7 @@ export function CapturaDetail({
   onClose: () => void;
 }) {
   return (
-    <BottomSheet>
+    <BottomSheet onBackdropClick={onClose}>
       <h2 className="text-base font-semibold text-ink">
         {captura.tipo === "captura" ? "🐗" : "👁"} {captura.especie}
         {captura.cantidad > 1 ? ` ×${captura.cantidad}` : ""}

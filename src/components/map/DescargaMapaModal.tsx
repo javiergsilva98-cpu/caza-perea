@@ -24,8 +24,10 @@ export function DescargaMapaModal({
   onCancelar: () => void;
   onCerrar: () => void;
 }) {
+  const cerrarHoja = estado === "confirmar" || estado === "descargando" ? onCancelar : onCerrar;
+
   return (
-    <BottomSheet>
+    <BottomSheet onBackdropClick={cerrarHoja}>
       <h2 className="text-base font-semibold text-ink">Descargar zona sin conexión</h2>
 
         {estado === "confirmar" && (

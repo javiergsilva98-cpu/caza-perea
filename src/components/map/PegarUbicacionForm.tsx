@@ -54,7 +54,7 @@ export function PegarUbicacionForm({
   }
 
   return (
-    <BottomSheet>
+    <BottomSheet onBackdropClick={onCancel}>
       <h2 className="text-base font-semibold text-ink">Pegar ubicación</h2>
       <p className="mt-1 text-xs text-ink-soft">
         Un enlace de Google Maps (largo o corto tipo maps.app.goo.gl) o unas

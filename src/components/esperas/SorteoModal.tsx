@@ -94,7 +94,7 @@ export function SorteoModal({
 
   if (puestos.length === 0) {
     return (
-      <BottomSheet showHandle={false}>
+      <BottomSheet showHandle={false} onBackdropClick={onCancel}>
         <p className="text-sm text-ink-soft">
           Todavía no hay ningún puesto creado en el mapa para poder sortear.
         </p>
@@ -110,7 +110,7 @@ export function SorteoModal({
   }
 
   return (
-    <BottomSheet scrollable>
+    <BottomSheet scrollable onBackdropClick={onCancel}>
       <h2 className="text-base font-semibold text-ink">🎲 Sortear puestos</h2>
 
         {!resultado ? (

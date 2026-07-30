@@ -45,7 +45,7 @@ export function EsperaForm({
 
   if (puestos.length === 0) {
     return (
-      <BottomSheet showHandle={false}>
+      <BottomSheet showHandle={false} onBackdropClick={onCancel}>
         <p className="text-sm text-ink-soft">
           Todavía no hay ningún puesto creado en el mapa. Crea uno (tipo
           &quot;Puesto&quot;) primero para poder asignarlo.
@@ -62,7 +62,7 @@ export function EsperaForm({
   }
 
   return (
-    <BottomSheet>
+    <BottomSheet onBackdropClick={onCancel}>
       <h2 className="text-base font-semibold text-ink">Asignar puesto</h2>
 
       <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">

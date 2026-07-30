@@ -58,7 +58,7 @@ export function ActividadForm({
 
   if (puntos.length === 0) {
     return (
-      <BottomSheet showHandle={false}>
+      <BottomSheet showHandle={false} onBackdropClick={onCancel}>
         <p className="text-sm text-ink-soft">
           Todavía no hay ningún punto de interés creado en el mapa. Crea un
           comedero o bebedero primero para poder registrar actividad sobre él.
@@ -75,7 +75,7 @@ export function ActividadForm({
   }
 
   return (
-    <BottomSheet>
+    <BottomSheet onBackdropClick={onCancel}>
       <h2 className="text-base font-semibold text-ink">Nueva actividad</h2>
 
       <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
