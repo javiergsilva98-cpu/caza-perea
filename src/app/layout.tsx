@@ -25,6 +25,20 @@ const splashDevices = [
   { name: "4-7", w: 375, h: 667, scale: 2 },
 ];
 
+// Next.js desduplica y transmite el <head> él mismo — añadir <link> a mano
+// en el root layout rompe ese mecanismo, así que las startup images se
+// declaran aquí y las genera la Metadata API.
+const startupImages = splashDevices.flatMap((d) => [
+  {
+    url: `/icons/splash/${d.name}-portrait.png`,
+    media: `(device-width: ${d.w}px) and (device-height: ${d.h}px) and (-webkit-device-pixel-ratio: ${d.scale}) and (orientation: portrait)`,
+  },
+  {
+    url: `/icons/splash/${d.name}-landscape.png`,
+    media: `(device-width: ${d.w}px) and (device-height: ${d.h}px) and (-webkit-device-pixel-ratio: ${d.scale}) and (orientation: landscape)`,
+  },
+]);
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://caza-perea.vercel.app"),
   title: "Casa Perea — Coto CU10053",
@@ -38,6 +52,7 @@ export const metadata: Metadata = {
     // env(safe-area-inset-top) donde haga falta.
     statusBarStyle: "black-translucent",
     title: "Casa Perea",
+    startupImage: startupImages,
   },
   icons: {
     icon: [
@@ -68,22 +83,6 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <head>
-        {splashDevices.flatMap((d) => [
-          <link
-            key={`${d.name}-portrait`}
-            rel="apple-touch-startup-image"
-            href={`/icons/splash/${d.name}-portrait.png`}
-            media={`(device-width: ${d.w}px) and (device-height: ${d.h}px) and (-webkit-device-pixel-ratio: ${d.scale}) and (orientation: portrait)`}
-          />,
-          <link
-            key={`${d.name}-landscape`}
-            rel="apple-touch-startup-image"
-            href={`/icons/splash/${d.name}-landscape.png`}
-            media={`(device-width: ${d.w}px) and (device-height: ${d.h}px) and (-webkit-device-pixel-ratio: ${d.scale}) and (orientation: landscape)`}
-          />,
-        ])}
-      </head>
       <body className="flex min-h-dvh flex-col bg-bg text-ink">
         {children}
         <ServiceWorkerRegister />
