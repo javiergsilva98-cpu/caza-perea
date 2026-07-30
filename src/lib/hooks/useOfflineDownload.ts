@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import L from "leaflet";
 import {
   tilesParaArea,
@@ -18,7 +18,13 @@ export function useOfflineDownload(map: L.Map | null, tileUrlTemplate: string) {
   const [tiles, setTiles] = useState<TileCoord[]>([]);
   const [progreso, setProgreso] = useState<ProgresoDescarga | null>(null);
 
-  function abrir() {
+  // Memoizadas: "abrir" viaja como MapTools.descargarZona a través del
+  // contexto compartido con AppNav (ver map-tools-context.tsx). El efecto de
+  // FincaMap que registra las herramientas depende de esta referencia — sin
+  // useCallback se recrea en cada render, el efecto se dispara de nuevo,
+  // vuelve a registrar las herramientas, eso repinta FincaMap (consume el
+  // mismo contexto) y se entra en un bucle infinito de renders.
+  const abrir = useCallback(() => {
     if (!map) return;
     const bounds = map.getBounds();
     const zoomActual = Math.round(map.getZoom());
@@ -37,9 +43,9 @@ export function useOfflineDownload(map: L.Map | null, tileUrlTemplate: string) {
     setTiles(tilesArea);
     setProgreso(null);
     setEstado(tilesArea.length > 4000 ? "demasiado_grande" : "confirmar");
-  }
+  }, [map]);
 
-  async function confirmar() {
+  const confirmar = useCallback(async () => {
     setEstado("descargando");
     const controller = new AbortController();
     abortRef.current = controller;
@@ -53,16 +59,16 @@ export function useOfflineDownload(map: L.Map | null, tileUrlTemplate: string) {
       setProgreso(resultado);
       setEstado("completa");
     }
-  }
+  }, [tileUrlTemplate, tiles]);
 
-  function cancelar() {
+  const cancelar = useCallback(() => {
     abortRef.current?.abort();
     setEstado(null);
-  }
+  }, []);
 
-  function cerrar() {
+  const cerrar = useCallback(() => {
     setEstado(null);
-  }
+  }, []);
 
   return { estado, tiles, progreso, abrir, confirmar, cancelar, cerrar };
 }
