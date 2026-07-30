@@ -204,6 +204,8 @@ export default function ActividadesPage() {
         <PuntoForm
           titulo="Nuevo punto"
           inicial={{ nombre: "", tipo: "comedero", notas: null, foto_url: null }}
+          lat={nuevoPuntoEn.lat}
+          lng={nuevoPuntoEn.lng}
           puedeEditar
           puedeBorrar={false}
           onSubmit={handlePuntoSubmit}

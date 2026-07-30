@@ -17,9 +17,29 @@ export interface PuntoFormValues {
   foto_url: string | null;
 }
 
+const ENLACES_COMO_LLEGAR = [
+  {
+    label: "Google Maps",
+    icono: "🗺️",
+    href: (lat: number, lng: number) => `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+  },
+  {
+    label: "Waze",
+    icono: "🧭",
+    href: (lat: number, lng: number) => `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`,
+  },
+  {
+    label: "Apple Maps",
+    icono: "🍎",
+    href: (lat: number, lng: number) => `https://maps.apple.com/?daddr=${lat},${lng}`,
+  },
+] as const;
+
 export function PuntoForm({
   titulo,
   inicial,
+  lat,
+  lng,
   puedeEditar,
   puedeBorrar,
   onSubmit,
@@ -31,6 +51,8 @@ export function PuntoForm({
 }: {
   titulo: string;
   inicial: PuntoFormValues;
+  lat: number;
+  lng: number;
   puedeEditar: boolean;
   puedeBorrar: boolean;
   onSubmit: (values: PuntoFormValues) => void | Promise<void>;
@@ -79,6 +101,20 @@ export function PuntoForm({
           Añadido por {creadoPorNombre} · {formatTimestamp(fechaCreacion)}
         </p>
       )}
+
+      <div className="mt-3 flex gap-2">
+        {ENLACES_COMO_LLEGAR.map((e) => (
+          <a
+            key={e.label}
+            href={e.href(lat, lng)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 rounded-lg border border-border px-2 py-2 text-center text-xs font-medium text-ink"
+          >
+            {e.icono} {e.label}
+          </a>
+        ))}
+      </div>
 
       <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
           <div className="flex flex-col gap-1">
