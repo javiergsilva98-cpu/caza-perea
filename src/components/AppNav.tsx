@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useMapTools } from "@/lib/map-tools-context";
 
 const HERRAMIENTAS = [
+  { href: "/mapa", label: "Mapa", icon: "🗺️" },
   { href: "/capturas", label: "Capturas", icon: "🎯" },
   { href: "/actividades", label: "Actividad", icon: "🧰" },
   { href: "/esperas", label: "Esperas", icon: "🪑" },
@@ -24,19 +25,6 @@ export function AppNav() {
   const [abierto, setAbierto] = useState(false);
   const { tools } = useMapTools();
 
-  if (pathname !== "/mapa") {
-    return (
-      <Link
-        href="/mapa"
-        aria-label="Volver al mapa"
-        title="Volver al mapa"
-        className={`fixed ${BOTTOM_SAFE} left-4 z-20 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-2xl leading-none text-white shadow-lg`}
-      >
-        🗺️
-      </Link>
-    );
-  }
-
   // El menú se queda abierto mientras la edición de la linde está activa,
   // para poder volver a tocar "Cancelar"/"Guardar linde" sin reabrirlo.
   const mostrar = abierto || !!tools.editarLindeActivo;
@@ -45,7 +33,7 @@ export function AppNav() {
     <div className={`fixed ${BOTTOM_SAFE} left-4 z-20 flex flex-col items-start gap-2`}>
       {mostrar && (
         <>
-          {HERRAMIENTAS.map((h) => (
+          {HERRAMIENTAS.filter((h) => h.href !== pathname).map((h) => (
             <Link key={h.href} href={h.href} onClick={() => setAbierto(false)} className={ITEM_CLASS}>
               <span className="text-xl leading-none">{h.icon}</span>
               {h.label}
@@ -77,10 +65,12 @@ export function AppNav() {
               {tools.editarLindeLabel ?? "Editar linde"}
             </button>
           )}
-          <Link href="/perfil" onClick={() => setAbierto(false)} className={ITEM_CLASS}>
-            <span className="text-xl leading-none">👤</span>
-            Perfil
-          </Link>
+          {pathname !== "/perfil" && (
+            <Link href="/perfil" onClick={() => setAbierto(false)} className={ITEM_CLASS}>
+              <span className="text-xl leading-none">👤</span>
+              Perfil
+            </Link>
+          )}
         </>
       )}
       <button
