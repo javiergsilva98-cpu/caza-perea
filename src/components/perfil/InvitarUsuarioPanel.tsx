@@ -48,7 +48,7 @@ export function InvitarUsuarioPanel() {
   }
 
   const mensajeCompartir = resultado
-    ? `Te he dado de alta en Casa Perea.\nEmail: ${resultado.email}\nContraseña: ${resultado.password}\n\nEntra en caza-perea.vercel.app y cámbiala cuando quieras desde tu perfil.`
+    ? `Te he dado de alta en Casa Perea.\nEmail: ${resultado.email}\nContraseña: ${resultado.password}\n\nEntra en https://caza-perea.vercel.app y cámbiala cuando quieras desde tu perfil.\n\nPuedes guardarte la página como aplicación dándole a compartir y añadir a pantalla de inicio.`
     : "";
 
   async function copiarMensaje() {
