@@ -2,28 +2,19 @@
 
 import { useState } from "react";
 import type { TipoCaptura } from "@/lib/supabase/database.types";
+import type { UsuarioBasico } from "@/lib/data/usuarios";
 import { FotoPicker } from "@/components/FotoPicker";
 import { subirFoto } from "@/lib/data/fotos";
 import { hoyISO } from "@/lib/format";
+import { ESPECIES } from "@/lib/capturas-especies";
 import { BottomSheet } from "@/components/BottomSheet";
-
-const ESPECIES = [
-  "Conejo",
-  "Perdiz",
-  "Paloma",
-  "Zorro",
-  "Jabalí",
-  "Corzo",
-  "Codorniz",
-  "Liebre",
-  "Zorzal",
-];
 
 export interface CapturaFormValues {
   tipo: TipoCaptura;
   especie: string;
   cantidad: number;
   fecha: string;
+  cazador_id: string;
   notas: string | null;
   foto_url: string | null;
 }
@@ -32,9 +23,11 @@ export interface CapturaFormValues {
 // registrar varias piezas de una tirada (p.ej. una paloma y un conejo)
 // sin tener que reabrirlo cada vez.
 export function CapturaForm({
+  usuarios,
   onSubmit,
   onCerrar,
 }: {
+  usuarios: UsuarioBasico[];
   onSubmit: (values: CapturaFormValues) => void | Promise<void>;
   onCerrar: () => void;
 }) {
@@ -42,6 +35,7 @@ export function CapturaForm({
   const [especie, setEspecie] = useState(ESPECIES[0]);
   const [cantidad, setCantidad] = useState(1);
   const [fecha, setFecha] = useState(hoyISO());
+  const [cazadorId, setCazadorId] = useState(usuarios[0]?.id ?? "");
   const [notas, setNotas] = useState("");
   const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
@@ -51,6 +45,7 @@ export function CapturaForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!cazadorId) return;
     setSaving(true);
     setError(null);
     let foto_url: string | null = null;
@@ -65,7 +60,7 @@ export function CapturaForm({
       }
     }
     try {
-      await onSubmit({ tipo, especie, cantidad, fecha, notas: notas.trim() || null, foto_url });
+      await onSubmit({ tipo, especie, cantidad, fecha, cazador_id: cazadorId, notas: notas.trim() || null, foto_url });
       setAnadidas((prev) => [
         ...prev,
         `${tipo === "captura" ? "🐗" : "👁"} ${especie}${cantidad > 1 ? ` ×${cantidad}` : ""}`,
@@ -119,6 +114,24 @@ export function CapturaForm({
           >
             👁 Avistamiento
           </button>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label htmlFor="captura-cazador" className="text-sm font-medium text-ink">
+            Cazador
+          </label>
+          <select
+            id="captura-cazador"
+            value={cazadorId}
+            onChange={(e) => setCazadorId(e.target.value)}
+            className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
+          >
+            {usuarios.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.nombre}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex flex-col gap-1">

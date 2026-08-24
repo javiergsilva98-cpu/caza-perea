@@ -10,13 +10,13 @@ function formatFecha(iso: string) {
 
 export function CapturaDetail({
   captura,
-  registradoPorNombre,
+  cazadorNombre,
   puedeBorrar,
   onDelete,
   onClose,
 }: {
   captura: CapturaRow;
-  registradoPorNombre: string;
+  cazadorNombre: string;
   puedeBorrar: boolean;
   onDelete: () => void | Promise<void>;
   onClose: () => void;
@@ -28,7 +28,7 @@ export function CapturaDetail({
         {captura.cantidad > 1 ? ` ×${captura.cantidad}` : ""}
       </h2>
       <p className="mt-1 text-xs text-ink-soft">
-        {formatFecha(captura.fecha)} · {registradoPorNombre}
+        {formatFecha(captura.fecha)} · {cazadorNombre}
       </p>
       {captura.foto_url && (
         // eslint-disable-next-line @next/next/no-img-element -- URL de Supabase Storage, no una imagen del propio sitio

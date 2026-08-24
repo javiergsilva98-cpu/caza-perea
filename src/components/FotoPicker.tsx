@@ -33,7 +33,6 @@ export function FotoPicker({
         <input
           type="file"
           accept="image/*"
-          capture="environment"
           className="hidden"
           onChange={handleChange}
         />

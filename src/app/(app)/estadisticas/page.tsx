@@ -33,7 +33,7 @@ export default function EstadisticasPage() {
   }, []);
 
   const capturasFiltradas = useMemo(
-    () => (scope === "yo" ? capturas.filter((c) => c.registrado_por === userId) : capturas),
+    () => (scope === "yo" ? capturas.filter((c) => c.cazador_id === userId) : capturas),
     [capturas, scope, userId]
   );
   const asistenciasFiltradas = useMemo(
@@ -72,7 +72,7 @@ export default function EstadisticasPage() {
       .map((u) => ({
         usuario: u,
         capturas: capturas
-          .filter((c) => c.registrado_por === u.id && c.tipo === "captura")
+          .filter((c) => c.cazador_id === u.id && c.tipo === "captura")
           .reduce((acc, c) => acc + c.cantidad, 0),
         dias: new Set(asistencias.filter((a) => a.cazador_id === u.id).map((a) => a.fecha)).size,
       }))

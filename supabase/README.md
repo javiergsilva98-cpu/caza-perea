@@ -48,7 +48,11 @@ where id = (select id from auth.users where email = 'tu-email@example.com');
   Cada edición inserta una fila nueva con `version` incremental; la vista
   `finca_limite_actual` expone siempre la última.
 - `capturas_avistamientos`: registro de capturas y avistamientos (especie,
-  cantidad, fecha, notas).
+  cantidad, fecha, notas), agrupadas por día en la app. `cazador_id` es
+  quién cazó la pieza, que puede no coincidir con `registrado_por` (quién la
+  anotó).
+- `jornada_asistentes`: quién estuvo presente cada día de caza, cazara algo
+  o no.
 - `actividades`: mantenimiento de puntos de interés (rellenado, revisión,
   reparación), con fecha estimada de la próxima para recordatorios.
 - `esperas`: asignación de cazadores a puestos en fechas concretas.
