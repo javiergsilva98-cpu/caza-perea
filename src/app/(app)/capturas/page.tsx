@@ -1,23 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { listCapturas, crearCaptura, borrarCaptura } from "@/lib/data/capturas";
-import { listUsuariosNombres } from "@/lib/data/usuarios";
+import { useEffect, useMemo, useState } from "react";
+import { listCapturas, crearCaptura } from "@/lib/data/capturas";
+import { listJornadaAsistentes } from "@/lib/data/jornada-asistentes";
+import { listUsuarios, listUsuariosNombres, type UsuarioBasico } from "@/lib/data/usuarios";
 import { startSyncTriggers } from "@/lib/sync/sync-manager";
-import type { CapturaRow } from "@/lib/offline/db";
+import type { CapturaRow, JornadaAsistenteRow } from "@/lib/offline/db";
+import { DiaCapturasForm } from "@/components/capturas/DiaCapturasForm";
 import { CapturaForm, type CapturaFormValues } from "@/components/capturas/CapturaForm";
 import { PegarUbicacionForm } from "@/components/map/PegarUbicacionForm";
 import { SyncBadge } from "@/components/map/SyncBadge";
 import type { Coords } from "@/lib/geo/google-maps";
-import { formatFecha } from "@/lib/format";
+import { formatFecha, hoyISO } from "@/lib/format";
 import { usePaginado } from "@/lib/hooks/usePaginado";
 import { useUserId } from "@/lib/hooks/useUserId";
 
+interface DiaCaptura {
+  fecha: string;
+  asistentes: JornadaAsistenteRow[];
+  capturas: CapturaRow[];
+}
+
+function agruparPorCazador(capturas: CapturaRow[]): { cazadorId: string; entradas: CapturaRow[] }[] {
+  const acc = new Map<string, CapturaRow[]>();
+  for (const c of capturas) {
+    acc.set(c.cazador_id, [...(acc.get(c.cazador_id) ?? []), c]);
+  }
+  return Array.from(acc.entries()).map(([cazadorId, entradas]) => ({ cazadorId, entradas }));
+}
+
 export default function CapturasPage() {
   const [capturas, setCapturas] = useState<CapturaRow[]>([]);
+  const [asistentes, setAsistentes] = useState<JornadaAsistenteRow[]>([]);
+  const [usuarios, setUsuarios] = useState<UsuarioBasico[]>([]);
   const [nombres, setNombres] = useState<Record<string, string>>({});
   const userId = useUserId();
-  const [showForm, setShowForm] = useState(false);
+  const [diaAbierto, setDiaAbierto] = useState<string | null>(null);
   const [pegarUbicacionAbierto, setPegarUbicacionAbierto] = useState(false);
   const [ubicacionPendiente, setUbicacionPendiente] = useState<Coords | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,42 +43,49 @@ export default function CapturasPage() {
   useEffect(() => {
     startSyncTriggers();
     (async () => {
-      const [lista, mapaNombres] = await Promise.all([
+      const [listaCapturas, listaAsistentes, listaUsuarios, mapaNombres] = await Promise.all([
         listCapturas(),
+        listJornadaAsistentes(),
+        listUsuarios(),
         listUsuariosNombres(),
       ]);
-      setCapturas(lista);
+      setCapturas(listaCapturas);
+      setAsistentes(listaAsistentes);
+      setUsuarios(listaUsuarios);
       setNombres(mapaNombres);
       setLoading(false);
     })();
   }, []);
 
-  async function handleSubmit(values: CapturaFormValues) {
+  const dias = useMemo<DiaCaptura[]>(() => {
+    const fechas = new Set<string>([...capturas.map((c) => c.fecha), ...asistentes.map((a) => a.fecha)]);
+    return Array.from(fechas)
+      .map((fecha) => ({
+        fecha,
+        asistentes: asistentes.filter((a) => a.fecha === fecha),
+        capturas: capturas.filter((c) => c.fecha === fecha),
+      }))
+      .sort((a, b) => (a.fecha < b.fecha ? 1 : -1));
+  }, [capturas, asistentes]);
+
+  const diaAbiertoDatos = dias.find((d) => d.fecha === diaAbierto);
+
+  async function handleUbicacionSubmit(values: CapturaFormValues) {
+    if (!ubicacionPendiente) return;
     const row = await crearCaptura({
       ...values,
-      lat: ubicacionPendiente?.lat ?? null,
-      lng: ubicacionPendiente?.lng ?? null,
+      lat: ubicacionPendiente.lat,
+      lng: ubicacionPendiente.lng,
     });
     setCapturas((prev) => [row, ...prev]);
-  }
-
-  function handleCerrarForm() {
-    setShowForm(false);
-    setUbicacionPendiente(null);
-  }
-
-  async function handleDelete(id: string) {
-    await borrarCaptura(id);
-    setCapturas((prev) => prev.filter((c) => c.id !== id));
   }
 
   function handleUbicacionResuelta(coords: Coords) {
     setUbicacionPendiente(coords);
     setPegarUbicacionAbierto(false);
-    setShowForm(true);
   }
 
-  const { visibles: capturasVisibles, hayMas, mostrarMas } = usePaginado(capturas);
+  const { visibles: diasVisibles, hayMas, mostrarMas } = usePaginado(dias);
 
   return (
     <div className="relative flex flex-1 flex-col">
@@ -73,42 +98,54 @@ export default function CapturasPage() {
 
         {loading && <p className="mt-4 text-sm text-ink-soft">Cargando…</p>}
 
-        {!loading && capturas.length === 0 && (
+        {!loading && dias.length === 0 && (
           <p className="mt-4 text-sm text-ink-soft">
-            Nada registrado todavía. Toca el botón + de abajo para añadir la primera.
+            Nada registrado todavía. Toca el botón + de abajo para añadir el primer día.
           </p>
         )}
 
         <ul className="mt-4 flex flex-col gap-2">
-          {capturasVisibles.map((c) => (
-            <li
-              key={c.id}
-              className="rounded-xl border border-border bg-bg-card p-3"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <span className="text-sm font-medium text-ink">
-                    {c.tipo === "captura" ? "🐗" : "👁"} {c.especie}
-                    {c.cantidad > 1 ? ` ×${c.cantidad}` : ""}
-                    {c.lat !== null && c.lng !== null && " 📍"}
-                  </span>
-                  <p className="mt-0.5 text-xs text-ink-soft">
-                    {formatFecha(c.fecha)} · {nombres[c.registrado_por] ?? "—"}
-                  </p>
-                  {c.notas && <p className="mt-1 text-sm text-ink-soft">{c.notas}</p>}
-                </div>
-                {c.registrado_por === userId && (
-                  <button
-                    type="button"
-                    onClick={() => void handleDelete(c.id)}
-                    className="shrink-0 -m-2 p-2 text-xs text-alert"
-                  >
-                    Borrar
-                  </button>
-                )}
-              </div>
-            </li>
-          ))}
+          {diasVisibles.map((dia) => {
+            const totalCapturas = dia.capturas
+              .filter((c) => c.tipo === "captura")
+              .reduce((acc, c) => acc + c.cantidad, 0);
+            return (
+              <li key={dia.fecha} className="rounded-xl border border-border bg-bg-card p-3">
+                <button type="button" onClick={() => setDiaAbierto(dia.fecha)} className="w-full text-left">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-sm font-semibold text-ink">
+                      {formatFecha(dia.fecha, { weekday: true, year: true })}
+                    </span>
+                    {totalCapturas > 0 && <span className="text-xs text-ink-soft">🐗 {totalCapturas}</span>}
+                  </div>
+                  {dia.asistentes.length > 0 && (
+                    <p className="mt-0.5 text-xs text-ink-soft">
+                      Estuvieron: {dia.asistentes.map((a) => nombres[a.cazador_id] ?? "—").join(", ")}
+                    </p>
+                  )}
+                  {dia.capturas.length === 0 ? (
+                    <p className="mt-2 text-sm text-ink-soft">Sin capturas registradas.</p>
+                  ) : (
+                    <ul className="mt-2 flex flex-col gap-0.5">
+                      {agruparPorCazador(dia.capturas).map(({ cazadorId, entradas }) => (
+                        <li key={cazadorId} className="text-sm text-ink">
+                          <span className="font-medium">{nombres[cazadorId] ?? "—"}:</span>{" "}
+                          {entradas
+                            .map(
+                              (e) =>
+                                `${e.tipo === "captura" ? "🐗" : "👁"} ${e.especie}${
+                                  e.cantidad > 1 ? ` ×${e.cantidad}` : ""
+                                }`
+                            )
+                            .join(", ")}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </button>
+              </li>
+            );
+          })}
         </ul>
 
         {hayMas && (
@@ -134,24 +171,43 @@ export default function CapturasPage() {
         </button>
         <button
           type="button"
-          onClick={() => {
-            setUbicacionPendiente(null);
-            setShowForm(true);
-          }}
-          aria-label="Registrar captura"
-          title="Registrar captura"
+          onClick={() => setDiaAbierto(hoyISO())}
+          aria-label="Registrar día de caza"
+          title="Registrar día de caza"
           className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-2xl leading-none text-white shadow-lg"
         >
           +
         </button>
       </div>
 
-      {showForm && <CapturaForm onSubmit={handleSubmit} onCerrar={handleCerrarForm} />}
+      {diaAbierto && (
+        <DiaCapturasForm
+          fechaInicial={diaAbierto}
+          usuarios={usuarios}
+          nombres={nombres}
+          userId={userId}
+          asistentes={diaAbiertoDatos?.asistentes ?? []}
+          capturas={diaAbiertoDatos?.capturas ?? []}
+          onAsistenteAgregado={(row) => setAsistentes((prev) => [...prev, row])}
+          onAsistenteQuitado={(id) => setAsistentes((prev) => prev.filter((a) => a.id !== id))}
+          onCapturaAgregada={(row) => setCapturas((prev) => [row, ...prev])}
+          onCapturaBorrada={(id) => setCapturas((prev) => prev.filter((c) => c.id !== id))}
+          onCerrar={() => setDiaAbierto(null)}
+        />
+      )}
 
       {pegarUbicacionAbierto && (
         <PegarUbicacionForm
           onResolved={handleUbicacionResuelta}
           onCancel={() => setPegarUbicacionAbierto(false)}
+        />
+      )}
+
+      {ubicacionPendiente && (
+        <CapturaForm
+          usuarios={usuarios}
+          onSubmit={handleUbicacionSubmit}
+          onCerrar={() => setUbicacionPendiente(null)}
         />
       )}
     </div>

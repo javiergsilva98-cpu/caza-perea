@@ -8,6 +8,7 @@ export interface NuevaCaptura {
   especie: string;
   cantidad: number;
   fecha: string; // YYYY-MM-DD
+  cazador_id: string;
   notas: string | null;
   lat: number | null;
   lng: number | null;
@@ -57,6 +58,7 @@ export async function crearCaptura(input: NuevaCaptura): Promise<CapturaRow> {
     notas: input.notas,
     foto_url: input.foto_url ?? null,
     registrado_por,
+    cazador_id: input.cazador_id,
     fecha: input.fecha,
     fecha_registro: new Date().toISOString(),
   };

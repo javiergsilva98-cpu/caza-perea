@@ -122,6 +122,7 @@ export interface Database {
           notas: string | null;
           foto_url: string | null;
           registrado_por: string;
+          cazador_id: string;
           fecha: string;
           fecha_registro: string;
         };
@@ -136,6 +137,7 @@ export interface Database {
           notas?: string | null;
           foto_url?: string | null;
           registrado_por?: string;
+          cazador_id?: string;
           fecha?: string;
           fecha_registro?: string;
         };
@@ -150,6 +152,7 @@ export interface Database {
           notas?: string | null;
           foto_url?: string | null;
           registrado_por?: string;
+          cazador_id?: string;
           fecha?: string;
           fecha_registro?: string;
         };
@@ -161,9 +164,52 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "capturas_avistamientos_cazador_id_fkey";
+            columns: ["cazador_id"];
+            referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "capturas_avistamientos_punto_interes_id_fkey";
             columns: ["punto_interes_id"];
             referencedRelation: "puntos_interes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      jornada_asistentes: {
+        Row: {
+          id: string;
+          fecha: string;
+          cazador_id: string;
+          registrado_por: string;
+          fecha_registro: string;
+        };
+        Insert: {
+          id?: string;
+          fecha: string;
+          cazador_id: string;
+          registrado_por?: string;
+          fecha_registro?: string;
+        };
+        Update: {
+          id?: string;
+          fecha?: string;
+          cazador_id?: string;
+          registrado_por?: string;
+          fecha_registro?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "jornada_asistentes_cazador_id_fkey";
+            columns: ["cazador_id"];
+            referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "jornada_asistentes_registrado_por_fkey";
+            columns: ["registrado_por"];
+            referencedRelation: "usuarios";
             referencedColumns: ["id"];
           },
         ];

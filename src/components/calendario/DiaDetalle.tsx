@@ -97,7 +97,7 @@ export function DiaDetalle({
               <li key={c.id} className="text-sm text-ink">
                 {c.tipo === "captura" ? "🐗" : "👁"} {c.especie}
                 {c.cantidad > 1 ? ` ×${c.cantidad}` : ""} —{" "}
-                <span className="text-ink-soft">{nombres[c.registrado_por] ?? "—"}</span>
+                <span className="text-ink-soft">{nombres[c.cazador_id] ?? "—"}</span>
               </li>
             ))}
           </ul>

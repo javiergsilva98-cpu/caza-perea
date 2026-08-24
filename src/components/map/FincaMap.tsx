@@ -16,7 +16,7 @@ import {
 import { getFincaLimiteActual, guardarFincaLimite } from "@/lib/data/finca-limite";
 import { listCapturas, crearCaptura, borrarCaptura } from "@/lib/data/capturas";
 import { crearActividad } from "@/lib/data/actividades";
-import { listUsuariosNombres } from "@/lib/data/usuarios";
+import { listUsuarios, listUsuariosNombres, type UsuarioBasico } from "@/lib/data/usuarios";
 import { startSyncTriggers } from "@/lib/sync/sync-manager";
 import { createClient } from "@/lib/supabase/client";
 import type { CapturaRow, PuntoInteresRow } from "@/lib/offline/db";
@@ -67,6 +67,7 @@ export function FincaMap() {
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [puntosLista, setPuntosLista] = useState<PuntoInteresRow[]>([]);
   const [nombres, setNombres] = useState<Record<string, string>>({});
+  const [usuarios, setUsuarios] = useState<UsuarioBasico[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   // Además de mapRef (usado en todo el resto del componente), se guarda la
@@ -243,17 +244,19 @@ export function FincaMap() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [puntos, limite, capturas, nombresMap] = await Promise.all([
+      const [puntos, limite, capturas, nombresMap, listaUsuarios] = await Promise.all([
         listPuntosInteres(),
         getFincaLimiteActual(),
         listCapturas(),
         listUsuariosNombres(),
+        listUsuarios(),
       ]);
       if (cancelled) return;
       puntos.forEach(addOrUpdateMarker);
       if (limite) renderBoundary(limite.geometria);
       capturas.forEach(addOrUpdateCapturaMarker);
       setNombres(nombresMap);
+      setUsuarios(listaUsuarios);
     })();
     return () => {
       cancelled = true;
@@ -575,13 +578,17 @@ export function FincaMap() {
       )}
 
       {capturaCrearEn && (
-        <CapturaForm onSubmit={handleCapturaSubmit} onCerrar={() => setCapturaCrearEn(null)} />
+        <CapturaForm
+          usuarios={usuarios}
+          onSubmit={handleCapturaSubmit}
+          onCerrar={() => setCapturaCrearEn(null)}
+        />
       )}
 
       {capturaDetalle && (
         <CapturaDetail
           captura={capturaDetalle}
-          registradoPorNombre={nombres[capturaDetalle.registrado_por] ?? "—"}
+          cazadorNombre={nombres[capturaDetalle.cazador_id] ?? "—"}
           puedeBorrar={capturaDetalle.registrado_por === userId || isAdmin}
           onDelete={handleCapturaDelete}
           onClose={() => setCapturaDetalle(null)}
