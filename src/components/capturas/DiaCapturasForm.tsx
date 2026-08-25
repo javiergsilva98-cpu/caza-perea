@@ -11,9 +11,11 @@ import { subirFoto } from "@/lib/data/fotos";
 import { ESPECIES } from "@/lib/capturas-especies";
 import { BottomSheet } from "@/components/BottomSheet";
 
-// Formulario del "día de caza": primero quién estuvo presente, luego qué
-// cazó cada uno. La fecha se bloquea en cuanto el día ya tiene algo
-// guardado, para no dejar asistentes/capturas huérfanos bajo la fecha vieja.
+// Formulario del "día de caza": elegir fecha y añadir directamente las
+// capturas de cada cazador (marca su asistencia automáticamente); "Quién
+// estuvo" es solo para apuntar a alguien que no cazó nada ese día. La
+// fecha se bloquea en cuanto el día ya tiene algo guardado, para no dejar
+// asistentes/capturas huérfanos bajo la fecha vieja.
 export function DiaCapturasForm({
   fechaInicial,
   usuarios,
@@ -42,10 +44,6 @@ export function DiaCapturasForm({
   const [fecha, setFecha] = useState(fechaInicial);
   const fechaBloqueada = asistentes.length > 0 || capturas.length > 0;
   const idsAsistentes = useMemo(() => new Set(asistentes.map((a) => a.cazador_id)), [asistentes]);
-  const cazadoresDisponibles = useMemo(
-    () => usuarios.filter((u) => idsAsistentes.has(u.id)),
-    [usuarios, idsAsistentes]
-  );
 
   const [tipo, setTipo] = useState<TipoCaptura>("captura");
   const [especie, setEspecie] = useState(ESPECIES[0]);
@@ -58,12 +56,14 @@ export function DiaCapturasForm({
   const [subiendoFoto, setSubiendoFoto] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Si la elección guardada ya no es un asistente marcado (o todavía no se
-  // ha elegido ninguno), se cae al primer asistente disponible en vez de
-  // guardar ese ajuste en un efecto aparte.
-  const cazadorId = cazadoresDisponibles.some((u) => u.id === cazadorIdElegido)
+  // Se puede elegir cualquiera del grupo como cazador, no hace falta
+  // marcarlo antes en "Quién estuvo" — al añadir su captura queda marcado
+  // como presente automáticamente. Si la elección guardada ya no existe en
+  // la lista de usuarios, se cae a el primero en vez de guardar ese ajuste
+  // en un efecto aparte.
+  const cazadorId = usuarios.some((u) => u.id === cazadorIdElegido)
     ? cazadorIdElegido
-    : (cazadoresDisponibles[0]?.id ?? "");
+    : (usuarios[0]?.id ?? "");
 
   async function toggleAsistente(usuario: UsuarioBasico) {
     setGuardandoAsistenteId(usuario.id);
@@ -98,6 +98,10 @@ export function DiaCapturasForm({
       }
     }
     try {
+      if (!idsAsistentes.has(cazadorId)) {
+        const asistenteRow = await marcarAsistente(fecha, cazadorId);
+        onAsistenteAgregado(asistenteRow);
+      }
       const row = await crearCaptura({
         tipo,
         especie,
@@ -193,10 +197,8 @@ export function DiaCapturasForm({
         </div>
       )}
 
-      {cazadoresDisponibles.length === 0 ? (
-        <p className="mt-4 text-sm text-ink-soft">
-          Marca primero quién estuvo para poder añadir sus capturas.
-        </p>
+      {usuarios.length === 0 ? (
+        <p className="mt-4 text-sm text-ink-soft">No hay cazadores dados de alta todavía.</p>
       ) : (
         <form onSubmit={handleAgregarCaptura} className="mt-4 flex flex-col gap-4 border-t border-border pt-4">
           <span className="text-sm font-medium text-ink">Añadir captura/avistamiento</span>
@@ -236,7 +238,7 @@ export function DiaCapturasForm({
               onChange={(e) => setCazadorIdElegido(e.target.value)}
               className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
             >
-              {cazadoresDisponibles.map((u) => (
+              {usuarios.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.nombre}
                 </option>
