@@ -8,7 +8,7 @@ import { crearCaptura, borrarCaptura } from "@/lib/data/capturas";
 import { marcarAsistente, quitarAsistente } from "@/lib/data/jornada-asistentes";
 import { FotoPicker } from "@/components/FotoPicker";
 import { subirFoto } from "@/lib/data/fotos";
-import { ESPECIES } from "@/lib/capturas-especies";
+import { ESPECIES, iconoEspecie } from "@/lib/capturas-especies";
 import { BottomSheet } from "@/components/BottomSheet";
 
 // Formulario del "día de caza": elegir fecha y añadir directamente las
@@ -47,7 +47,7 @@ export function DiaCapturasForm({
 
   const [tipo, setTipo] = useState<TipoCaptura>("captura");
   const [especie, setEspecie] = useState(ESPECIES[0]);
-  const [cantidad, setCantidad] = useState(1);
+  const [cantidad, setCantidad] = useState("");
   const [cazadorIdElegido, setCazadorIdElegido] = useState("");
   const [notas, setNotas] = useState("");
   const [fotoFile, setFotoFile] = useState<File | null>(null);
@@ -105,7 +105,7 @@ export function DiaCapturasForm({
       const row = await crearCaptura({
         tipo,
         especie,
-        cantidad,
+        cantidad: Math.max(1, Math.floor(Number(cantidad)) || 1),
         fecha,
         cazador_id: cazadorId,
         notas: notas.trim() || null,
@@ -114,7 +114,7 @@ export function DiaCapturasForm({
         foto_url,
       });
       onCapturaAgregada(row);
-      setCantidad(1);
+      setCantidad("");
       setNotas("");
       setFotoFile(null);
     } finally {
@@ -177,11 +177,17 @@ export function DiaCapturasForm({
                 key={c.id}
                 className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2 text-sm"
               >
-                <span className="text-ink">
-                  {c.tipo === "captura" ? "🐗" : "👁"} {c.especie}
-                  {c.cantidad > 1 ? ` ×${c.cantidad}` : ""} —{" "}
-                  <span className="text-ink-soft">{nombres[c.cazador_id] ?? "—"}</span>
-                </span>
+                <div className="flex items-center gap-2">
+                  {c.foto_url && (
+                    // eslint-disable-next-line @next/next/no-img-element -- URL de Supabase Storage
+                    <img src={c.foto_url} alt="" className="h-10 w-10 shrink-0 rounded-md object-cover" />
+                  )}
+                  <span className="text-ink">
+                    {c.tipo === "captura" ? iconoEspecie(c.especie) : "👁"} {c.especie}
+                    {c.cantidad > 1 ? ` ×${c.cantidad}` : ""} —{" "}
+                    <span className="text-ink-soft">{nombres[c.cazador_id] ?? "—"}</span>
+                  </span>
+                </div>
                 {c.registrado_por === userId && (
                   <button
                     type="button"
@@ -272,8 +278,9 @@ export function DiaCapturasForm({
               id="dia-cantidad"
               type="number"
               min={1}
+              placeholder="1"
               value={cantidad}
-              onChange={(e) => setCantidad(Math.max(1, Number(e.target.value) || 1))}
+              onChange={(e) => setCantidad(e.target.value)}
               className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
             />
           </div>

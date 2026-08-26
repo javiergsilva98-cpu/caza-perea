@@ -149,7 +149,7 @@ export function FincaMap() {
       existing.setLatLng([c.lat, c.lng]);
       return;
     }
-    const marker = L.marker([c.lat, c.lng], { icon: iconoCaptura(c.tipo) });
+    const marker = L.marker([c.lat, c.lng], { icon: iconoCaptura(c.tipo, c.especie) });
     marker.on("click", () => {
       const actual = capturasRef.current.get(c.id);
       if (actual) setCapturaDetalle(actual);

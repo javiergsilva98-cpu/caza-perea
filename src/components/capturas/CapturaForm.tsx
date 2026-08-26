@@ -6,7 +6,7 @@ import type { UsuarioBasico } from "@/lib/data/usuarios";
 import { FotoPicker } from "@/components/FotoPicker";
 import { subirFoto } from "@/lib/data/fotos";
 import { hoyISO } from "@/lib/format";
-import { ESPECIES } from "@/lib/capturas-especies";
+import { ESPECIES, iconoEspecie } from "@/lib/capturas-especies";
 import { BottomSheet } from "@/components/BottomSheet";
 
 export interface CapturaFormValues {
@@ -33,7 +33,7 @@ export function CapturaForm({
 }) {
   const [tipo, setTipo] = useState<TipoCaptura>("captura");
   const [especie, setEspecie] = useState(ESPECIES[0]);
-  const [cantidad, setCantidad] = useState(1);
+  const [cantidad, setCantidad] = useState("");
   const [fecha, setFecha] = useState(hoyISO());
   const [cazadorId, setCazadorId] = useState(usuarios[0]?.id ?? "");
   const [notas, setNotas] = useState("");
@@ -48,6 +48,7 @@ export function CapturaForm({
     if (!cazadorId) return;
     setSaving(true);
     setError(null);
+    const cantidadFinal = Math.max(1, Math.floor(Number(cantidad)) || 1);
     let foto_url: string | null = null;
     if (fotoFile) {
       setSubiendoFoto(true);
@@ -60,12 +61,20 @@ export function CapturaForm({
       }
     }
     try {
-      await onSubmit({ tipo, especie, cantidad, fecha, cazador_id: cazadorId, notas: notas.trim() || null, foto_url });
+      await onSubmit({
+        tipo,
+        especie,
+        cantidad: cantidadFinal,
+        fecha,
+        cazador_id: cazadorId,
+        notas: notas.trim() || null,
+        foto_url,
+      });
       setAnadidas((prev) => [
         ...prev,
-        `${tipo === "captura" ? "🐗" : "👁"} ${especie}${cantidad > 1 ? ` ×${cantidad}` : ""}`,
+        `${tipo === "captura" ? iconoEspecie(especie) : "👁"} ${especie}${cantidadFinal > 1 ? ` ×${cantidadFinal}` : ""}`,
       ]);
-      setCantidad(1);
+      setCantidad("");
       setNotas("");
       setFotoFile(null);
     } finally {
@@ -161,8 +170,9 @@ export function CapturaForm({
               id="cantidad"
               type="number"
               min={1}
+              placeholder="1"
               value={cantidad}
-              onChange={(e) => setCantidad(Math.max(1, Number(e.target.value) || 1))}
+              onChange={(e) => setCantidad(e.target.value)}
               className="rounded-lg border border-border bg-bg-card px-4 py-3 text-base text-ink outline-none focus:border-primary"
             />
           </div>
