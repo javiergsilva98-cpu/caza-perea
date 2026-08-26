@@ -214,6 +214,37 @@ export interface Database {
           },
         ];
       };
+      jornadas: {
+        Row: {
+          id: string;
+          fecha: string;
+          foto_url: string | null;
+          registrado_por: string;
+          fecha_registro: string;
+        };
+        Insert: {
+          id?: string;
+          fecha: string;
+          foto_url?: string | null;
+          registrado_por?: string;
+          fecha_registro?: string;
+        };
+        Update: {
+          id?: string;
+          fecha?: string;
+          foto_url?: string | null;
+          registrado_por?: string;
+          fecha_registro?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "jornadas_registrado_por_fkey";
+            columns: ["registrado_por"];
+            referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       actividades: {
         Row: {
           id: string;
@@ -315,6 +346,7 @@ export interface Database {
           cazador_id: string;
           fecha: string;
           notas: string | null;
+          registrado_por: string;
           fecha_registro: string;
         };
         Insert: {
@@ -322,6 +354,7 @@ export interface Database {
           cazador_id?: string;
           fecha: string;
           notas?: string | null;
+          registrado_por?: string;
           fecha_registro?: string;
         };
         Update: {
@@ -329,12 +362,19 @@ export interface Database {
           cazador_id?: string;
           fecha?: string;
           notas?: string | null;
+          registrado_por?: string;
           fecha_registro?: string;
         };
         Relationships: [
           {
             foreignKeyName: "calendario_asistencias_cazador_id_fkey";
             columns: ["cazador_id"];
+            referencedRelation: "usuarios";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "calendario_asistencias_registrado_por_fkey";
+            columns: ["registrado_por"];
             referencedRelation: "usuarios";
             referencedColumns: ["id"];
           },

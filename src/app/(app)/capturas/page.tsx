@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { listCapturas, crearCaptura } from "@/lib/data/capturas";
 import { listJornadaAsistentes } from "@/lib/data/jornada-asistentes";
+import { listJornadas } from "@/lib/data/jornadas";
 import { listUsuarios, listUsuariosNombres, type UsuarioBasico } from "@/lib/data/usuarios";
 import { startSyncTriggers } from "@/lib/sync/sync-manager";
-import type { CapturaRow, JornadaAsistenteRow } from "@/lib/offline/db";
+import type { CapturaRow, JornadaAsistenteRow, JornadaRow } from "@/lib/offline/db";
 import { DiaCapturasForm } from "@/components/capturas/DiaCapturasForm";
 import { CapturaForm, type CapturaFormValues } from "@/components/capturas/CapturaForm";
 import { PegarUbicacionForm } from "@/components/map/PegarUbicacionForm";
@@ -20,6 +21,7 @@ interface DiaCaptura {
   fecha: string;
   asistentes: JornadaAsistenteRow[];
   capturas: CapturaRow[];
+  fotoUrl: string | null;
 }
 
 function agruparPorCazador(capturas: CapturaRow[]): { cazadorId: string; entradas: CapturaRow[] }[] {
@@ -33,6 +35,7 @@ function agruparPorCazador(capturas: CapturaRow[]): { cazadorId: string; entrada
 export default function CapturasPage() {
   const [capturas, setCapturas] = useState<CapturaRow[]>([]);
   const [asistentes, setAsistentes] = useState<JornadaAsistenteRow[]>([]);
+  const [jornadas, setJornadas] = useState<JornadaRow[]>([]);
   const [usuarios, setUsuarios] = useState<UsuarioBasico[]>([]);
   const [nombres, setNombres] = useState<Record<string, string>>({});
   const userId = useUserId();
@@ -44,14 +47,16 @@ export default function CapturasPage() {
   useEffect(() => {
     startSyncTriggers();
     (async () => {
-      const [listaCapturas, listaAsistentes, listaUsuarios, mapaNombres] = await Promise.all([
+      const [listaCapturas, listaAsistentes, listaJornadas, listaUsuarios, mapaNombres] = await Promise.all([
         listCapturas(),
         listJornadaAsistentes(),
+        listJornadas(),
         listUsuarios(),
         listUsuariosNombres(),
       ]);
       setCapturas(listaCapturas);
       setAsistentes(listaAsistentes);
+      setJornadas(listaJornadas);
       setUsuarios(listaUsuarios);
       setNombres(mapaNombres);
       setLoading(false);
@@ -59,15 +64,20 @@ export default function CapturasPage() {
   }, []);
 
   const dias = useMemo<DiaCaptura[]>(() => {
-    const fechas = new Set<string>([...capturas.map((c) => c.fecha), ...asistentes.map((a) => a.fecha)]);
+    const fechas = new Set<string>([
+      ...capturas.map((c) => c.fecha),
+      ...asistentes.map((a) => a.fecha),
+      ...jornadas.map((j) => j.fecha),
+    ]);
     return Array.from(fechas)
       .map((fecha) => ({
         fecha,
         asistentes: asistentes.filter((a) => a.fecha === fecha),
         capturas: capturas.filter((c) => c.fecha === fecha),
+        fotoUrl: jornadas.find((j) => j.fecha === fecha)?.foto_url ?? null,
       }))
       .sort((a, b) => (a.fecha < b.fecha ? 1 : -1));
-  }, [capturas, asistentes]);
+  }, [capturas, asistentes, jornadas]);
 
   const diaAbiertoDatos = dias.find((d) => d.fecha === diaAbierto);
 
@@ -112,7 +122,16 @@ export default function CapturasPage() {
               .reduce((acc, c) => acc + c.cantidad, 0);
             return (
               <li key={dia.fecha} className="rounded-xl border border-border bg-bg-card p-3">
-                <button type="button" onClick={() => setDiaAbierto(dia.fecha)} className="w-full text-left">
+                <button type="button" onClick={() => setDiaAbierto(dia.fecha)} className="flex w-full gap-3 text-left">
+                  {dia.fotoUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element -- URL de Supabase Storage
+                    <img
+                      src={dia.fotoUrl}
+                      alt=""
+                      className="h-14 w-14 shrink-0 rounded-lg object-cover"
+                    />
+                  )}
+                  <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-semibold text-ink">
                       {formatFecha(dia.fecha, { weekday: true, year: true })}
@@ -143,6 +162,7 @@ export default function CapturasPage() {
                       ))}
                     </ul>
                   )}
+                  </div>
                 </button>
               </li>
             );
@@ -189,10 +209,14 @@ export default function CapturasPage() {
           userId={userId}
           asistentes={diaAbiertoDatos?.asistentes ?? []}
           capturas={diaAbiertoDatos?.capturas ?? []}
+          fotoJornada={diaAbiertoDatos?.fotoUrl ?? null}
           onAsistenteAgregado={(row) => setAsistentes((prev) => [...prev, row])}
           onAsistenteQuitado={(id) => setAsistentes((prev) => prev.filter((a) => a.id !== id))}
           onCapturaAgregada={(row) => setCapturas((prev) => [row, ...prev])}
           onCapturaBorrada={(id) => setCapturas((prev) => prev.filter((c) => c.id !== id))}
+          onFotoJornadaActualizada={(row) =>
+            setJornadas((prev) => [...prev.filter((j) => j.id !== row.id), row])
+          }
           onCerrar={() => setDiaAbierto(null)}
         />
       )}
