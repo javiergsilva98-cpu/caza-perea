@@ -1,6 +1,7 @@
 "use client";
 
 import type { ActividadRow, CapturaRow, EsperaRow } from "@/lib/offline/db";
+import type { UsuarioBasico } from "@/lib/data/usuarios";
 import { TIPO_ACTIVIDAD_LABEL } from "@/components/map/icons";
 import { BottomSheet } from "@/components/BottomSheet";
 
@@ -16,9 +17,9 @@ function formatFechaLarga(fecha: string) {
 
 export function DiaDetalle({
   fecha,
-  asistentes,
-  yoAsisto,
-  cambiandoAsistencia,
+  usuarios,
+  asistentesIds,
+  cambiandoAsistenciaId,
   onToggleAsistencia,
   onAnadirActividad,
   capturas,
@@ -29,10 +30,10 @@ export function DiaDetalle({
   onClose,
 }: {
   fecha: string;
-  asistentes: { id: string; nombre: string }[];
-  yoAsisto: boolean;
-  cambiandoAsistencia: boolean;
-  onToggleAsistencia: () => void;
+  usuarios: UsuarioBasico[];
+  asistentesIds: Set<string>;
+  cambiandoAsistenciaId: string | null;
+  onToggleAsistencia: (cazadorId: string) => void;
   onAnadirActividad: () => void;
   capturas: CapturaRow[];
   actividades: ActividadRow[];
@@ -47,43 +48,36 @@ export function DiaDetalle({
     <BottomSheet onBackdropClick={onClose} scrollable>
       <h2 className="text-base font-semibold text-ink">{formatFechaLarga(fecha)}</h2>
 
-      <div className="mt-4 flex gap-2">
-        <button
-          type="button"
-          onClick={onToggleAsistencia}
-          disabled={cambiandoAsistencia}
-          className={`flex-1 rounded-lg px-4 py-3 text-sm font-medium disabled:opacity-60 ${
-            yoAsisto ? "border border-alert text-alert" : "bg-primary text-white"
-          }`}
-        >
-          {cambiandoAsistencia ? "Guardando…" : yoAsisto ? "No voy" : "Marcar que voy"}
-        </button>
-        <button
-          type="button"
-          onClick={onAnadirActividad}
-          className="flex-1 rounded-lg border border-primary/30 px-4 py-3 text-sm font-medium text-primary"
-        >
-          🧰 Añadir actividad
-        </button>
-      </div>
-
       <div className="mt-4">
         <h3 className="text-xs font-medium uppercase tracking-wide text-ink-soft">Van</h3>
-        {asistentes.length === 0 ? (
-          <p className="mt-1 text-sm text-ink-soft">Nadie marcado todavía.</p>
-        ) : (
-          <div className="mt-1 flex flex-wrap gap-2">
-            {asistentes.map((a) => (
-              <span
-                key={a.id}
-                className="rounded-full border border-border bg-bg px-3 py-1 text-xs text-ink"
+        <div className="mt-1 flex flex-wrap gap-2">
+          {usuarios.map((u) => {
+            const activo = asistentesIds.has(u.id);
+            return (
+              <button
+                key={u.id}
+                type="button"
+                disabled={cambiandoAsistenciaId === u.id}
+                onClick={() => onToggleAsistencia(u.id)}
+                className={`rounded-full border px-3 py-2 text-sm font-medium disabled:opacity-60 ${
+                  activo ? "border-primary bg-primary/10 text-primary" : "border-border text-ink-soft"
+                }`}
               >
-                {a.nombre}
-              </span>
-            ))}
-          </div>
-        )}
+                {activo ? "✓ " : ""}
+                {u.nombre}
+              </button>
+            );
+          })}
+        </div>
       </div>
+
+      <button
+        type="button"
+        onClick={onAnadirActividad}
+        className="mt-4 w-full rounded-lg border border-primary/30 px-4 py-3 text-sm font-medium text-primary"
+      >
+        🧰 Añadir actividad
+      </button>
 
       {!hayAlgo && <p className="mt-4 text-sm text-ink-soft">Nada registrado este día.</p>}
 
