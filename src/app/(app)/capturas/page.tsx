@@ -32,6 +32,25 @@ function agruparPorCazador(capturas: CapturaRow[]): { cazadorId: string; entrada
   return Array.from(acc.entries()).map(([cazadorId, entradas]) => ({ cazadorId, entradas }));
 }
 
+// La especie con más ejemplares cazados ese día (ignora avistamientos),
+// para el icono resumen de la jornada.
+function especiePrincipal(capturas: CapturaRow[]): string | null {
+  const porEspecie = new Map<string, number>();
+  for (const c of capturas) {
+    if (c.tipo !== "captura") continue;
+    porEspecie.set(c.especie, (porEspecie.get(c.especie) ?? 0) + c.cantidad);
+  }
+  let mejor: string | null = null;
+  let maxCantidad = 0;
+  for (const [especie, cantidad] of porEspecie) {
+    if (cantidad > maxCantidad) {
+      maxCantidad = cantidad;
+      mejor = especie;
+    }
+  }
+  return mejor;
+}
+
 export default function CapturasPage() {
   const [capturas, setCapturas] = useState<CapturaRow[]>([]);
   const [asistentes, setAsistentes] = useState<JornadaAsistenteRow[]>([]);
@@ -120,6 +139,7 @@ export default function CapturasPage() {
             const totalCapturas = dia.capturas
               .filter((c) => c.tipo === "captura")
               .reduce((acc, c) => acc + c.cantidad, 0);
+            const principal = especiePrincipal(dia.capturas);
             return (
               <li key={dia.fecha} className="rounded-xl border border-border bg-bg-card p-3">
                 <button type="button" onClick={() => setDiaAbierto(dia.fecha)} className="flex w-full gap-3 text-left">
@@ -136,7 +156,11 @@ export default function CapturasPage() {
                     <span className="text-sm font-semibold text-ink">
                       {formatFecha(dia.fecha, { weekday: true, year: true })}
                     </span>
-                    {totalCapturas > 0 && <span className="text-xs text-ink-soft">🐗 {totalCapturas}</span>}
+                    {totalCapturas > 0 && principal && (
+                      <span className="text-xs text-ink-soft">
+                        {iconoEspecie(principal)} {totalCapturas}
+                      </span>
+                    )}
                   </div>
                   {dia.asistentes.length > 0 && (
                     <p className="mt-0.5 text-xs text-ink-soft">
