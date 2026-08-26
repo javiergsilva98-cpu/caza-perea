@@ -121,7 +121,7 @@ export function DiaDetalle({
 
       {esperas.length > 0 && (
         <div className="mt-4">
-          <h3 className="text-xs font-medium uppercase tracking-wide text-ink-soft">Esperas</h3>
+          <h3 className="text-xs font-medium uppercase tracking-wide text-ink-soft">Puestos</h3>
           <ul className="mt-1 flex flex-col gap-1">
             {esperas.map((e) => (
               <li key={e.id} className="text-sm text-ink">

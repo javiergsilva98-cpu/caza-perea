@@ -116,7 +116,7 @@ export default function EsperasPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 pb-24">
-        <h1 className="text-xl font-semibold text-ink">Esperas y puestos</h1>
+        <h1 className="text-xl font-semibold text-ink">Puestos</h1>
 
         {!loading && reparto.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
