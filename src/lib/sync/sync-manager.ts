@@ -40,6 +40,7 @@ const TABLE_BY_ENTITY = {
   gasto: "gastos",
   item_lista: "lista_maleta",
   jornada_asistente: "jornada_asistentes",
+  jornada: "jornadas",
 } as const;
 
 // finca_limite es de solo-inserción: cada edición crea una versión nueva

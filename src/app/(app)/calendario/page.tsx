@@ -35,7 +35,7 @@ export default function CalendarioPage() {
   const userId = useUserId();
   const [diaSeleccionado, setDiaSeleccionado] = useState<string | null>(null);
   const [actividadEnFecha, setActividadEnFecha] = useState<string | null>(null);
-  const [cambiandoAsistencia, setCambiandoAsistencia] = useState(false);
+  const [cambiandoAsistenciaId, setCambiandoAsistenciaId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -83,20 +83,20 @@ export default function CalendarioPage() {
       .map((a) => ({ id: a.cazador_id, nombre: nombrePorId[a.cazador_id] ?? "—" }));
   }
 
-  async function handleToggleAsistencia() {
-    if (!diaSeleccionado || !userId) return;
-    const mia = asistencias.find((a) => a.fecha === diaSeleccionado && a.cazador_id === userId);
-    setCambiandoAsistencia(true);
+  async function handleToggleAsistencia(cazadorId: string) {
+    if (!diaSeleccionado) return;
+    const existente = asistencias.find((a) => a.fecha === diaSeleccionado && a.cazador_id === cazadorId);
+    setCambiandoAsistenciaId(cazadorId);
     try {
-      if (mia) {
-        await quitarAsistencia(mia.id);
-        setAsistencias((prev) => prev.filter((a) => a.id !== mia.id));
+      if (existente) {
+        await quitarAsistencia(existente.id);
+        setAsistencias((prev) => prev.filter((a) => a.id !== existente.id));
       } else {
-        const row = await marcarAsistencia(diaSeleccionado);
+        const row = await marcarAsistencia(diaSeleccionado, cazadorId);
         setAsistencias((prev) => [...prev, row]);
       }
     } finally {
-      setCambiandoAsistencia(false);
+      setCambiandoAsistenciaId(null);
     }
   }
 
@@ -211,10 +211,10 @@ export default function CalendarioPage() {
       {dia && (
         <DiaDetalle
           fecha={dia.fecha}
-          asistentes={dia.asistentes}
-          yoAsisto={!!userId && dia.asistentes.some((a) => a.id === userId)}
-          cambiandoAsistencia={cambiandoAsistencia}
-          onToggleAsistencia={() => void handleToggleAsistencia()}
+          usuarios={usuarios}
+          asistentesIds={new Set(dia.asistentes.map((a) => a.id))}
+          cambiandoAsistenciaId={cambiandoAsistenciaId}
+          onToggleAsistencia={(cazadorId) => void handleToggleAsistencia(cazadorId)}
           onAnadirActividad={() => {
             setActividadEnFecha(dia.fecha);
             setDiaSeleccionado(null);

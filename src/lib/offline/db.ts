@@ -11,6 +11,7 @@ export type CalendarioAsistenciaRow =
 export type GastoRow = Database["public"]["Tables"]["gastos"]["Row"];
 export type ListaMaletaRow = Database["public"]["Tables"]["lista_maleta"]["Row"];
 export type JornadaAsistenteRow = Database["public"]["Tables"]["jornada_asistentes"]["Row"];
+export type JornadaRow = Database["public"]["Tables"]["jornadas"]["Row"];
 
 export type OutboxEntity =
   | "punto_interes"
@@ -21,7 +22,8 @@ export type OutboxEntity =
   | "calendario_asistencia"
   | "gasto"
   | "item_lista"
-  | "jornada_asistente";
+  | "jornada_asistente"
+  | "jornada";
 export type OutboxOp = "insert" | "update" | "delete";
 
 export interface OutboxEntry {
@@ -52,6 +54,7 @@ class CasaPereaDB extends Dexie {
   gastos!: Table<GastoRow, string>;
   listaMaleta!: Table<ListaMaletaRow, string>;
   jornadaAsistentes!: Table<JornadaAsistenteRow, string>;
+  jornadas!: Table<JornadaRow, string>;
   outbox!: Table<OutboxEntry, number>;
   syncErrors!: Table<SyncErrorEntry, number>;
 
@@ -89,6 +92,10 @@ class CasaPereaDB extends Dexie {
     // v7: quién estuvo presente cada día de caza (capturas por día).
     this.version(7).stores({
       jornadaAsistentes: "id, fecha, cazador_id",
+    });
+    // v8: foto general de la jornada (una por día, no por captura).
+    this.version(8).stores({
+      jornadas: "id, fecha",
     });
   }
 }

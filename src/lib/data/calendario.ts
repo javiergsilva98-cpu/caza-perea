@@ -29,11 +29,16 @@ export async function listAsistencias(): Promise<CalendarioAsistenciaRow[]> {
   return cached.sort((a, b) => (a.fecha < b.fecha ? -1 : 1));
 }
 
-// Marca al usuario actual como que va ese día. No hace nada si ya estaba
-// marcado (idempotente, para no depender de comprobar antes en el cliente).
-export async function marcarAsistencia(fecha: string, notas: string | null = null): Promise<CalendarioAsistenciaRow> {
+// Marca a un cazador (uno mismo u otro del grupo) como que va ese día. No
+// hace nada si ya estaba marcado (idempotente, para no depender de
+// comprobar antes en el cliente).
+export async function marcarAsistencia(
+  fecha: string,
+  cazador_id: string,
+  notas: string | null = null
+): Promise<CalendarioAsistenciaRow> {
   const db = getDb();
-  const cazador_id = await currentUserId();
+  const registrado_por = await currentUserId();
 
   const existente = await db.calendarioAsistencias
     .where("cazador_id")
@@ -47,6 +52,7 @@ export async function marcarAsistencia(fecha: string, notas: string | null = nul
     cazador_id,
     fecha,
     notas,
+    registrado_por,
     fecha_registro: new Date().toISOString(),
   };
 

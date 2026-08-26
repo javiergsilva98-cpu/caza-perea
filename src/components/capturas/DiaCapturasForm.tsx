@@ -2,10 +2,11 @@
 
 import { useMemo, useState } from "react";
 import type { TipoCaptura } from "@/lib/supabase/database.types";
-import type { CapturaRow, JornadaAsistenteRow } from "@/lib/offline/db";
+import type { CapturaRow, JornadaAsistenteRow, JornadaRow } from "@/lib/offline/db";
 import type { UsuarioBasico } from "@/lib/data/usuarios";
 import { crearCaptura, borrarCaptura } from "@/lib/data/capturas";
 import { marcarAsistente, quitarAsistente } from "@/lib/data/jornada-asistentes";
+import { guardarFotoJornada } from "@/lib/data/jornadas";
 import { FotoPicker } from "@/components/FotoPicker";
 import { subirFoto } from "@/lib/data/fotos";
 import { ESPECIES, iconoEspecie } from "@/lib/capturas-especies";
@@ -23,10 +24,12 @@ export function DiaCapturasForm({
   userId,
   asistentes,
   capturas,
+  fotoJornada,
   onAsistenteAgregado,
   onAsistenteQuitado,
   onCapturaAgregada,
   onCapturaBorrada,
+  onFotoJornadaActualizada,
   onCerrar,
 }: {
   fechaInicial: string;
@@ -35,14 +38,16 @@ export function DiaCapturasForm({
   userId: string | null;
   asistentes: JornadaAsistenteRow[];
   capturas: CapturaRow[];
+  fotoJornada: string | null;
   onAsistenteAgregado: (row: JornadaAsistenteRow) => void;
   onAsistenteQuitado: (id: string) => void;
   onCapturaAgregada: (row: CapturaRow) => void;
   onCapturaBorrada: (id: string) => void;
+  onFotoJornadaActualizada: (row: JornadaRow) => void;
   onCerrar: () => void;
 }) {
   const [fecha, setFecha] = useState(fechaInicial);
-  const fechaBloqueada = asistentes.length > 0 || capturas.length > 0;
+  const fechaBloqueada = asistentes.length > 0 || capturas.length > 0 || !!fotoJornada;
   const idsAsistentes = useMemo(() => new Set(asistentes.map((a) => a.cazador_id)), [asistentes]);
 
   const [tipo, setTipo] = useState<TipoCaptura>("captura");
@@ -50,10 +55,9 @@ export function DiaCapturasForm({
   const [cantidad, setCantidad] = useState("");
   const [cazadorIdElegido, setCazadorIdElegido] = useState("");
   const [notas, setNotas] = useState("");
-  const [fotoFile, setFotoFile] = useState<File | null>(null);
   const [guardandoAsistenteId, setGuardandoAsistenteId] = useState<string | null>(null);
   const [guardandoCaptura, setGuardandoCaptura] = useState(false);
-  const [subiendoFoto, setSubiendoFoto] = useState(false);
+  const [subiendoFotoJornada, setSubiendoFotoJornada] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Se puede elegir cualquiera del grupo como cazador, no hace falta
@@ -86,17 +90,6 @@ export function DiaCapturasForm({
     if (!cazadorId) return;
     setGuardandoCaptura(true);
     setError(null);
-    let foto_url: string | null = null;
-    if (fotoFile) {
-      setSubiendoFoto(true);
-      try {
-        foto_url = await subirFoto("capturas", fotoFile);
-      } catch {
-        setError("No se ha podido subir la foto (¿sin conexión?) — se guarda sin ella.");
-      } finally {
-        setSubiendoFoto(false);
-      }
-    }
     try {
       if (!idsAsistentes.has(cazadorId)) {
         const asistenteRow = await marcarAsistente(fecha, cazadorId);
@@ -111,12 +104,11 @@ export function DiaCapturasForm({
         notas: notas.trim() || null,
         lat: null,
         lng: null,
-        foto_url,
+        foto_url: null,
       });
       onCapturaAgregada(row);
       setCantidad("");
       setNotas("");
-      setFotoFile(null);
     } finally {
       setGuardandoCaptura(false);
     }
@@ -125,6 +117,21 @@ export function DiaCapturasForm({
   async function handleBorrarCaptura(id: string) {
     await borrarCaptura(id);
     onCapturaBorrada(id);
+  }
+
+  async function handleFotoJornadaChange(file: File | null) {
+    if (!file) return;
+    setSubiendoFotoJornada(true);
+    setError(null);
+    try {
+      const foto_url = await subirFoto("jornadas", file);
+      const row = await guardarFotoJornada(fecha, foto_url);
+      onFotoJornadaActualizada(row);
+    } catch {
+      setError("No se ha podido subir la foto de la jornada (¿sin conexión?).");
+    } finally {
+      setSubiendoFotoJornada(false);
+    }
   }
 
   return (
@@ -166,6 +173,16 @@ export function DiaCapturasForm({
             );
           })}
         </div>
+      </div>
+
+      <div className="mt-4">
+        <FotoPicker
+          label="Foto de la jornada"
+          fotoActualUrl={fotoJornada}
+          onFileChange={(file) => void handleFotoJornadaChange(file)}
+        />
+        {subiendoFotoJornada && <p className="mt-1 text-xs text-ink-soft">Subiendo foto…</p>}
+        {error && <p className="mt-1 text-sm text-alert">{error}</p>}
       </div>
 
       {capturas.length > 0 && (
@@ -298,16 +315,12 @@ export function DiaCapturasForm({
             />
           </div>
 
-          <FotoPicker onFileChange={setFotoFile} />
-
-          {error && <p className="text-sm text-alert">{error}</p>}
-
           <button
             type="submit"
             disabled={guardandoCaptura}
             className="rounded-lg bg-secondary px-4 py-3 text-sm font-medium text-white disabled:opacity-60"
           >
-            {subiendoFoto ? "Subiendo foto…" : guardandoCaptura ? "Guardando…" : "Añadir"}
+            {guardandoCaptura ? "Guardando…" : "Añadir"}
           </button>
         </form>
       )}
