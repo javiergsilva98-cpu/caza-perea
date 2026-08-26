@@ -12,6 +12,7 @@ import { PegarUbicacionForm } from "@/components/map/PegarUbicacionForm";
 import { SyncBadge } from "@/components/map/SyncBadge";
 import type { Coords } from "@/lib/geo/google-maps";
 import { formatFecha, hoyISO } from "@/lib/format";
+import { iconoEspecie } from "@/lib/capturas-especies";
 import { usePaginado } from "@/lib/hooks/usePaginado";
 import { useUserId } from "@/lib/hooks/useUserId";
 
@@ -94,7 +95,7 @@ export default function CapturasPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 pb-24">
-        <h1 className="text-xl font-semibold text-ink">Capturas y avistamientos</h1>
+        <h1 className="text-xl font-semibold text-ink">Jornadas de caza</h1>
 
         {loading && <p className="mt-4 text-sm text-ink-soft">Cargando…</p>}
 
@@ -133,7 +134,7 @@ export default function CapturasPage() {
                           {entradas
                             .map(
                               (e) =>
-                                `${e.tipo === "captura" ? "🐗" : "👁"} ${e.especie}${
+                                `${e.tipo === "captura" ? iconoEspecie(e.especie) : "👁"} ${e.especie}${
                                   e.cantidad > 1 ? ` ×${e.cantidad}` : ""
                                 }`
                             )

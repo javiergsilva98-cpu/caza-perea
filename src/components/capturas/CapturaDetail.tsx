@@ -2,6 +2,7 @@
 
 import type { CapturaRow } from "@/lib/offline/db";
 import { formatFecha as formatFechaBase } from "@/lib/format";
+import { iconoEspecie } from "@/lib/capturas-especies";
 import { BottomSheet } from "@/components/BottomSheet";
 
 function formatFecha(iso: string) {
@@ -24,7 +25,7 @@ export function CapturaDetail({
   return (
     <BottomSheet onBackdropClick={onClose}>
       <h2 className="text-base font-semibold text-ink">
-        {captura.tipo === "captura" ? "🐗" : "👁"} {captura.especie}
+        {captura.tipo === "captura" ? iconoEspecie(captura.especie) : "👁"} {captura.especie}
         {captura.cantidad > 1 ? ` ×${captura.cantidad}` : ""}
       </h2>
       <p className="mt-1 text-xs text-ink-soft">

@@ -7,12 +7,11 @@ import { useMapTools } from "@/lib/map-tools-context";
 
 const HERRAMIENTAS = [
   { href: "/mapa", label: "Mapa", icon: "🗺️" },
-  { href: "/capturas", label: "Capturas", icon: "🎯" },
+  { href: "/capturas", label: "Jornadas", icon: "🎯" },
   { href: "/actividades", label: "Actividad", icon: "🧰" },
-  { href: "/esperas", label: "Esperas", icon: "🪑" },
+  { href: "/esperas", label: "Puestos", icon: "🪑" },
   { href: "/calendario", label: "Calendario", icon: "📅" },
   { href: "/gastos", label: "Gastos", icon: "💶" },
-  { href: "/lista", label: "Maleta", icon: "🎒" },
   { href: "/tiempo", label: "Tiempo", icon: "🌤️" },
 ] as const;
 

@@ -166,8 +166,20 @@ export function PuntoForm({
             />
           </div>
 
-          {puedeEditar && (
+          {puedeEditar ? (
             <FotoPicker fotoActualUrl={inicial.foto_url} onFileChange={setFotoFile} />
+          ) : (
+            inicial.foto_url && (
+              <div className="flex flex-col gap-1">
+                <span className="text-sm font-medium text-ink">Foto</span>
+                {/* eslint-disable-next-line @next/next/no-img-element -- URL de Supabase Storage */}
+                <img
+                  src={inicial.foto_url}
+                  alt=""
+                  className="h-32 w-full rounded-lg object-cover"
+                />
+              </div>
+            )
           )}
 
           {error && <p className="text-sm text-alert">{error}</p>}

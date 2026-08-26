@@ -1,5 +1,6 @@
 import L from "leaflet";
 import type { TipoActividad, TipoCaptura, TipoPuntoInteres } from "@/lib/supabase/database.types";
+import { iconoEspecie } from "@/lib/capturas-especies";
 
 export const TIPO_EMOJI: Record<TipoPuntoInteres, string> = {
   comedero: "🌾",
@@ -15,11 +16,6 @@ export const TIPO_LABEL: Record<TipoPuntoInteres, string> = {
   puesto: "Puesto",
   casa: "Casa",
   otro: "Otro",
-};
-
-const EMOJI_CAPTURA: Record<TipoCaptura, string> = {
-  captura: "🐗",
-  avistamiento: "👁",
 };
 
 export const TIPO_ACTIVIDAD_LABEL: Record<TipoActividad, string> = {
@@ -42,6 +38,6 @@ export function iconoPunto(tipo: TipoPuntoInteres): L.DivIcon {
   return divIconEmoji(TIPO_EMOJI[tipo] ?? TIPO_EMOJI.otro);
 }
 
-export function iconoCaptura(tipo: TipoCaptura): L.DivIcon {
-  return divIconEmoji(EMOJI_CAPTURA[tipo] ?? EMOJI_CAPTURA.avistamiento);
+export function iconoCaptura(tipo: TipoCaptura, especie: string): L.DivIcon {
+  return divIconEmoji(tipo === "avistamiento" ? "👁" : iconoEspecie(especie));
 }
