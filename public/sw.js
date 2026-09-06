@@ -1,4 +1,4 @@
-const CACHE_VERSION = "casa-perea-v4";
+const CACHE_VERSION = "casa-perea-v5";
 // Debe coincidir exactamente con TILE_CACHE en src/lib/offline/tile-cache.ts.
 const TILE_CACHE = "casa-perea-tiles-v1";
 const CURRENT_CACHES = [CACHE_VERSION, TILE_CACHE];
